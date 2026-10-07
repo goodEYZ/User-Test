@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A7%3C/text%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Splot">
+<meta name="theme-color" content="#F2F0F8">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Splot — 스펙트럼 데이팅 프로토타입</title>
 <style>
 :root{
@@ -495,6 +502,22 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 @keyframes heartPop{0%{transform:scale(.9)}55%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes heartFly{0%{opacity:1;transform:translateY(0) scale(1.5)}60%{opacity:1}100%{opacity:0;transform:translateY(-260px) scale(2.3)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style id="app-mode">
+/* ----- 홈 화면에 추가해 앱처럼 쓸 때 (iPhone / Android) ----- */
+html{-webkit-tap-highlight-color:transparent}
+body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+input,textarea{-webkit-user-select:text;user-select:text}
+@media (max-width:519px){
+  html,body{background:var(--ground)}
+  :root{padding-bottom:0}
+  .tabs{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .sheet{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+  .onb-foot{padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+  .composer{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  input.inp:not(.big),textarea.ta:not(.big),.composer .inp{font-size:16px!important}   /* iOS가 입력칸을 누를 때 화면을 확대하지 않도록 */
+}
 </style>
 </head>
 <body>
@@ -2479,6 +2502,11 @@ updateBadges();
 setView('field');
 startOnboarding();
 })();
+</script>
+<script>
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 </script>
 </body>
 </html>

@@ -183,7 +183,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .chip.emo{font-size:20px;line-height:1;min-width:44px;min-height:44px;padding:0}
 .fab{width:40px;height:40px;border-radius:50%;border:0;background:#fff;box-shadow:0 2px 8px rgba(30,20,70,.2);cursor:pointer;padding:0;display:grid;place-items:center;color:#24203B}
 .fab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
-.list-mode #rangeChip,.list-mode #unmarkChip,.list-mode .fab{display:none}
+.list-mode #unmarkChip,.list-mode .fab{display:none}
 
 /* 처음 접속했을 때 뜨는 사용법 팝업 */
 .intro{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(20,15,50,.38)}
@@ -290,8 +290,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .trk.self .mbar{background:var(--ink)}
 .mh{position:absolute;top:-4px;bottom:-4px;width:24px;cursor:ew-resize;touch-action:none}
 .mh.l{left:-12px}.mh.r{right:-12px}
-.mh::after{content:"";position:absolute;top:11px;bottom:11px;width:3px;border-radius:2px;background:rgba(255,255,255,.95)}
-.mh.l::after{left:19px}.mh.r::after{right:19px}
+.mh::after{content:"";position:absolute;top:6px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(30,20,70,.28)}
+.mh.l::after{left:14px}.mh.r::after{right:14px}
 .mends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin:0 8px}
 .trk .tkrow{margin:0 8px}
 .reset{display:block;margin:28px auto 6px;border:0;background:none;color:var(--ink2);text-decoration:underline;font-size:13px;cursor:pointer;padding:10px}
@@ -592,7 +592,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       </header>
       <div class="meta" id="meta"></div>
       <div class="opts">
-        <div class="opts-l"><button class="chip" id="prefBtnList">모든 기준 범위 설정</button><button class="chip" id="rangeChip" aria-pressed="false">유동 범위 보기</button><button class="chip" id="unmarkChip" hidden>미표기 0명</button></div>
+        <div class="opts-l"><button class="chip" id="prefBtnList">모든 기준 범위 설정</button><button class="chip" id="unmarkChip" hidden>미표기 0명</button></div>
         <button class="fab" id="prefBtn" aria-label="선호 범위 설정"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 14h14"/><circle cx="7" cy="6" r="2.2" fill="#fff"/><circle cx="13" cy="14" r="2.2" fill="#fff"/></svg></button>
       </div>
     </div>
@@ -753,7 +753,7 @@ const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').
 const CAP=50;        // 한 번에 추천되는 인원
 const STEP=.05;      // 스냅 단위 (1/20)
 const MINP=.15;      // 선호 범위의 최소 폭 (스냅 3칸)
-const MINSELF=.08;   // 내 프로필 범위의 최소 폭
+const MINSELF=.14;   // 내 프로필 범위의 최소 폭
 const VIEW=.75;      // 확대 1x일 때 화면 하나가 담는 축 범위
 const ZMIN=.3, ZMAX=6;
 const PAD=.05, KEEP=.18, MOVER=.12;
@@ -1403,7 +1403,7 @@ function renderList(){
   $('#list').innerHTML=arr.map(p=>{
     const t=tier(p);
     return `<button class="row${t===0?' out':''}" data-id="${p.id}">
-      ${avatarHTML(p)}
+      <div class="avatar">${p.emoji}</div>
       <div class="t"><b>${esc(p.name)}, ${p.age}</b><span>${X.name}: ${show(p,X)} · ${Y.name}: ${show(p,Y)}</span></div>
       ${t===2?'<span class="badge">범위 안</span>':(t===1?'<span class="badge soft">일부 겹침</span>':(t===-1?'<span class="badge soft">미표기</span>':''))}
     </button>`;
@@ -2398,11 +2398,6 @@ $('#intro').addEventListener('click',e=>{if(e.target.id==='intro') closeIntro()}
 $('#helpBtn').onclick=()=>{$('#intro').hidden=false};
 $$('#fieldLayer [data-ax]').forEach(b=>b.onclick=()=>openAxisPicker(b.dataset.ax));
 $('#swap').onclick=()=>{const t=state.x;state.x=state.y;state.y=t;buildField();fadeWorld()};
-$('#rangeChip').onclick=e=>{
-  state.ranges=!state.ranges;
-  e.currentTarget.setAttribute('aria-pressed',state.ranges);
-  updateRanges();
-};
 $('#meTog').onchange=e=>{
   state.showMe=e.target.checked;
   const mk=$('#meMark'); if(mk) mk.hidden=!state.showMe;

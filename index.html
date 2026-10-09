@@ -116,7 +116,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 /* 내가 찾는 범위 */
 .zone{position:absolute;border-radius:19px;pointer-events:none;
   background:linear-gradient(135deg,rgba(86,106,214,.34),rgba(150,108,210,.20))}
-.zl{position:absolute;left:9px;top:9px;width:18px;height:18px;fill:none;stroke:var(--pzt);stroke-width:2;stroke-linecap:round;pointer-events:none}
+.zl{position:absolute;left:9px;top:9px;width:18px;height:18px;fill:none;stroke:var(--pzt);stroke-width:2;stroke-linecap:round;pointer-events:none;opacity:.35}
 .zh{position:absolute;transform:translate(-50%,-50%);border-radius:4px;background:var(--pz);border:0;padding:0;touch-action:none;z-index:7;box-shadow:0 1px 4px rgba(40,50,120,.5)}
 .zh::after{content:"";position:absolute}
 .zh.n,.zh.s{width:30px;height:5px;cursor:ns-resize}
@@ -384,6 +384,25 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .trk.locked{cursor:pointer}
 .rt{display:flex;align-items:center;gap:10px}
 .req{font-size:11px;font-style:normal;color:var(--ink2);margin-left:6px;font-weight:500}
+.star{color:#D2434F;font-weight:700;margin-left:3px}
+.reqnote{margin:18px 0 0;font-size:12px;color:var(--ink2)}
+.basis{display:flex;gap:8px;margin:2px 0 14px}
+.basis .bs{flex:1;min-width:0;background:var(--field);border:1.5px solid var(--zone);border-radius:14px;padding:9px 12px;display:flex;flex-direction:column;gap:1px}
+.basis .bs.out{border-color:var(--line)}
+.basis .bs.off{border-color:var(--line);border-style:dashed}
+.basis .bn{font-size:11.5px;color:var(--ink2);font-weight:600}
+.basis b{font-size:15px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.basis i{font-style:normal;font-size:11.5px;font-weight:600;color:var(--zone)}
+.basis .bs.out i{color:var(--ink2)}
+.chat-who{display:flex;gap:10px;align-items:center;border:0;background:none;padding:2px 6px 2px 2px;margin:0;border-radius:12px;cursor:pointer;font:inherit;text-align:left}
+.mrow{display:flex;gap:8px;align-items:flex-end;align-self:flex-start;max-width:86%}
+.mrow .msg{max-width:none}
+.mav{border:0;background:none;padding:0;cursor:pointer;flex:none;width:30px;height:30px}
+.mav .avatar{width:30px;height:30px;font-size:15px}
+.mav.sp{visibility:hidden;pointer-events:none}
+.composer.kb{padding-bottom:10px}
+#prefBtnList{display:none}
+.list-mode #prefBtnList{display:inline-flex}
 .offbtn{border:0;background:none;color:var(--ink2);text-decoration:underline;font-size:12px;cursor:pointer;padding:4px 0 4px 6px}
 .mdesc.off{font-weight:500}
 .trk .mbar.unset{background:transparent;box-shadow:inset 0 0 0 2px #B7B2D0}
@@ -573,7 +592,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       </header>
       <div class="meta" id="meta"></div>
       <div class="opts">
-        <div class="opts-l"><button class="chip" id="rangeChip" aria-pressed="false">유동 범위 보기</button><button class="chip" id="unmarkChip" hidden>미표기 0명</button></div>
+        <div class="opts-l"><button class="chip" id="prefBtnList">모든 기준 범위 설정</button><button class="chip" id="rangeChip" aria-pressed="false">유동 범위 보기</button><button class="chip" id="unmarkChip" hidden>미표기 0명</button></div>
         <button class="fab" id="prefBtn" aria-label="선호 범위 설정"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 14h14"/><circle cx="7" cy="6" r="2.2" fill="#fff"/><circle cx="13" cy="14" r="2.2" fill="#fff"/></svg></button>
       </div>
     </div>
@@ -736,7 +755,7 @@ const STEP=.05;      // 스냅 단위 (1/20)
 const MINP=.15;      // 선호 범위의 최소 폭 (스냅 3칸)
 const MINSELF=.08;   // 내 프로필 범위의 최소 폭
 const VIEW=.75;      // 확대 1x일 때 화면 하나가 담는 축 범위
-const ZMIN=.3, ZMAX=2.5;
+const ZMIN=.3, ZMAX=6;
 const PAD=.05, KEEP=.18, MOVER=.12;
 const EPS=1e-4;
 
@@ -760,7 +779,7 @@ const kmOf=v=>300*v*v;
 function ticksFor(ax){
   if(ax.kind==='dist') return [[0,'0'],[5,''],[10,'10'],[20,''],[30,'30'],[50,''],[100,'100'],[150,''],[200,'200'],[250,''],[300,'300km']].map(([km,l])=>({v:Math.sqrt(km/300),label:l,major:!!l}));
   if(ax.kind==='age'){const o=[];for(let y=-15;y<=15;y++)o.push({v:.5+y/30,label:y%5===0?(y>0?'+'+y:String(y)):'',major:y%5===0});return o}
-  if(ax.kind==='height'){const o=[];for(let c=-40;c<=40;c+=5)o.push({v:.5+c/80,label:c%10===0?(c>0?'+'+c:String(c)):'',major:c%10===0});return o}
+  if(ax.kind==='height'){const o=[];for(let c=-40;c<=40;c++)o.push({v:.5+c/80,label:c%10===0?(c>0?'+'+c:String(c)):'',major:c%5===0});return o}
   return [];
 }
 function tickRow(ax){
@@ -843,77 +862,78 @@ let enterIds=new Set();
 let shown=[];
 let dragging=false;
 let noClickUntil=0;
-// 스냅 단위는 축마다 달라요: 나이 1살, 키 5cm, 나머지는 1/20
-const stepOf=id=>id==='age'?1/30:(id==='height'?1/16:STEP);
-const minOf=id=>state.snap?Math.ceil(MINP/stepOf(id)-1e-9)*stepOf(id):MINP;
+// 스냅 단위는 축마다 달라요: 나이 1살, 키 1cm, 나머지는 1/20
+const stepOf=id=>id==='age'?1/30:(id==='height'?1/80:STEP);
+const minOfRaw=id=>id==='height'?1/40:MINP;      // 키는 최소 2cm 폭까지 좁힐 수 있어요
+const minOf=id=>state.snap?Math.ceil(minOfRaw(id)/stepOf(id)-1e-9)*stepOf(id):minOfRaw(id);
 const sn=(v,id)=>{ if(!state.snap) return r4(v); const s=stepOf(id); return r4(Math.round(v/s)*s); };
 
 /* ---------- 프로필 데이터 ---------- */
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const raw=[
- ["Cocacola", 27, "그들", "From Spain", "🏺"],
- ["도윤", 29, "그", "보드게임 카페 단골. 룰 설명 잘함", "🎲"],
- ["서아", 26, "그녀", "필름 카메라로 동네 골목 찍는 중", "📷"],
- ["지후", 31, "그녀", "러닝 크루 총무, 페이스는 느긋", "🏃"],
- ["유나", 25, "그/그들", "새벽에 빵 굽고 낮에 잠", "🥐"],
+ ["Cocacola", 26, "그들", "From Spain", "🏺"],
+ ["도윤", 32, "그", "보드게임 카페 단골. 룰 설명 잘함", "🎲"],
+ ["서아", 27, "그녀", "필름 카메라로 동네 골목 찍는 중", "📷"],
+ ["지후", 34, "그녀", "러닝 크루 총무, 페이스는 느긋", "🏃"],
+ ["유나", 26, "그/그들", "새벽에 빵 굽고 낮에 잠", "🥐"],
  ["민재", 28, "그", "전시 보러 다니고 감상은 짧게", "🖼️"],
- ["소이", 30, "그녀/그들", "식물 키우다 방이 정글이 됨", "🪴"],
- ["태오", 33, "그녀", "재즈 바에서 조용히 듣는 편", "🎷"],
- ["Sasha", 24, "그녀", "Free as a bird", "🧗"],
- ["시우", 29, "그", "이름으로 불러주세요. 밤 산책 좋아함", "🌙"],
- ["Hi", 27, "그녀", "Looking for nothing", "📚"],
- ["준", 32, "대명사 없음", "요리 영상 따라 하다 실력이 늘었음", "🍳"],
- ["담", 26, "그들", "직접 만든 향초 팝업 준비 중", "🕯️"],
- ["해온", 28, "대명사 없음", "록 페스티벌 티켓팅 전사", "🎸"],
- ["돌", 34, "그", "퇴근 후 수영, 주말엔 낮잠", "🏊"],
+ ["소이", 33, "그녀/그들", "식물 키우다 방이 정글이 됨", "🪴"],
+ ["태오", 34, "그녀", "재즈 바에서 조용히 듣는 편", "🎷"],
+ ["Sasha", 22, "그녀", "Free as a bird", "🧗"],
+ ["시우", 32, "그", "이름으로 불러주세요. 밤 산책 좋아함", "🌙"],
+ ["Hi", 24, "그녀", "Looking for nothing", "📚"],
+ ["준", 35, "대명사 없음", "요리 영상 따라 하다 실력이 늘었음", "🍳"],
+ ["담", 23, "그들", "직접 만든 향초 팝업 준비 중", "🕯️"],
+ ["해온", 31, "대명사 없음", "록 페스티벌 티켓팅 전사", "🎸"],
+ ["돌", 37, "그", "퇴근 후 수영, 주말엔 낮잠", "🏊"],
  ["Ian", 25, "그들", "한국어가 아직 서툴지만 친구 사귀고 싶어요", "✏️"],
- ["보람", 30, "그", "뜨개질하면서 다큐 보기", "🧶"],
- ["우진", 27, "그녀", "카페 투어 기록용 계정 운영", "☕"],
- ["다솜", 29, "그녀", "합주실 예약이 취미", "🥁"],
- ["룡", 31, "그녀", "여행 계획 세우는 걸 더 좋아함", "🧳"],
- ["세하", 26, "그", "하루 만 보 걷기 챌린지 진행 중", "👟"],
- ["온", 28, "대명사 없음", "말이 느린 대신 편지는 잘 씀", "💌"],
- ["가온", 28, "그녀/그들", "야간 자전거, 새벽 라면", "🚲"],
- ["재이", 27, "그녀/그들", "동네 독립영화관 멤버십 3년 차", "🎞️"],
- ["종연", 31, "그", "술 대신 차를 모으는 중", "🍵"],
+ ["보람", 33, "그", "뜨개질하면서 다큐 보기", "🧶"],
+ ["우진", 24, "그녀", "카페 투어 기록용 계정 운영", "☕"],
+ ["다솜", 30, "그녀", "합주실 예약이 취미", "🥁"],
+ ["룡", 33, "그녀", "여행 계획 세우는 걸 더 좋아함", "🧳"],
+ ["세하", 28, "그", "하루 만 보 걷기 챌린지 진행 중", "👟"],
+ ["온", 32, "대명사 없음", "말이 느린 대신 편지는 잘 씀", "💌"],
+ ["가온", 30, "그녀/그들", "야간 자전거, 새벽 라면", "🚲"],
+ ["재이", 26, "그녀/그들", "동네 독립영화관 멤버십 3년 차", "🎞️"],
+ ["종연", 36, "그", "술 대신 차를 모으는 중", "🍵"],
  ["로아", 30, "그", "발레 배우다 관절이 항의 중", "🩰"],
- ["안녕", 30, "그", "캠핑 장비만 계속 늘고 있음", "⛺"],
- ["멜론", 33, "그", "오래된 LP 수집가", "💿"],
- ["윤", 29, "그녀", "말보다 산책", "🌳"],
- ["새벽", 26, "그들", "야근 없는 삶을 설계 중", "🌅"],
- ["도하", 28, "그녀/그들", "새벽 수영 뒤에 먹는 김밥이 낙", "🍙"],
- ["채민", 26, "그녀", "포토샵으로 포스터 만드는 게 취미", "🖌️"],
- ["그냥", 30, "그", "동네 도서관 스터디룸 지박령", "📖"],
- ["하린", 27, "그녀", "반려 고양이 두 마리와 동거 중", "🐈"],
- ["Karl", 32, "그", "Wanna catch beer?", "⛰️"],
- ["바바", 29, "그녀/그들", "재밌는 사람이 좋아요", "🪘"],
+ ["안녕", 29, "그", "캠핑 장비만 계속 늘고 있음", "⛺"],
+ ["멜론", 36, "그", "오래된 LP 수집가", "💿"],
+ ["윤", 30, "그녀", "말보다 산책", "🌳"],
+ ["새벽", 25, "그들", "야근 없는 삶을 설계 중", "🌅"],
+ ["도하", 25, "그녀/그들", "새벽 수영 뒤에 먹는 김밥이 낙", "🍙"],
+ ["채민", 23, "그녀", "포토샵으로 포스터 만드는 게 취미", "🖌️"],
+ ["그냥", 34, "그", "동네 도서관 스터디룸 지박령", "📖"],
+ ["하린", 30, "그녀", "반려 고양이 두 마리와 동거 중", "🐈"],
+ ["Karl", 36, "그", "Wanna catch beer?", "⛰️"],
+ ["바바", 28, "그녀/그들", "재밌는 사람이 좋아요", "🪘"],
  ["시원", 25, "그", "축구 직관하러 전국 순회", "⚽"],
- ["나무", 31, "대명사 없음", "손으로 쓰는 일기 8년째", "📓"],
- ["예준", 28, "그", "코딩하다 새벽에 라면 끓이는 사람", "💻"],
- ["지안", 26, "그들", "독립출판 zine 만들기", "📰"],
- ["혁", 33, "그", "칵테일 레시피 노트를 모으는 중", "🍸"],
- ["도경", 27, "그", "서핑 강습 받다 물만 마심", "🏄"],
- ["은우", 30, "그/그들", "주말엔 봉사, 평일엔 야근", "🤝"],
- ["태이", 24, "그", "드라마 정주행 전문", "📺"],
+ ["나무", 33, "대명사 없음", "손으로 쓰는 일기 8년째", "📓"],
+ ["예준", 31, "그", "코딩하다 새벽에 라면 끓이는 사람", "💻"],
+ ["지안", 22, "그들", "독립출판 zine 만들기", "📰"],
+ ["혁", 37, "그", "칵테일 레시피 노트를 모으는 중", "🍸"],
+ ["도경", 24, "그", "서핑 강습 받다 물만 마심", "🏄"],
+ ["은우", 31, "그/그들", "주말엔 봉사, 평일엔 야근", "🤝"],
+ ["태이", 22, "그", "드라마 정주행 전문", "📺"],
  ["라온", 29, "그", "베이킹 실패작도 다 먹어줌", "🍪"],
- ["지호", 27, "그", "주말 농구 모임 막내", "🏀"],
- ["원", 25, "그/그녀/그들", "하루 한 장 그림일기", "🖍️"],
- ["이든", 30, "그녀", "오래된 카메라 수리가 취미", "🔧"],
- ["채우", 28, "그", "동네 빵집 순례 중", "🥖"],
- ["Alex", 26, "그", "Yoga machine", "🧘"],
- ["도현", 33, "그녀", "새벽 낚시 가는 사람", "🎣"],
+ ["지호", 25, "그", "주말 농구 모임 막내", "🏀"],
+ ["원", 23, "그/그녀/그들", "하루 한 장 그림일기", "🖍️"],
+ ["이든", 29, "그녀", "오래된 카메라 수리가 취미", "🔧"],
+ ["채우", 27, "그", "동네 빵집 순례 중", "🥖"],
+ ["Alex", 27, "그", "Yoga machine", "🧘"],
+ ["도현", 35, "그녀", "새벽 낚시 가는 사람", "🎣"],
  ["봉키", 24, "그녀", "게임 대회 구경이 취미", "🎮"],
- ["여름", 29, "그", "여름이면 물가에서 삶", "🍉"],
- ["별", 27, "그", "별자리 앱 알림 켜두는 사람", "⭐"],
- ["Brian", 31, "대명사 없음", "Slow walks and short notes", "📝"],
- ["Xan", 28, "그들", "Share me your playlist", "🎹"],
- ["정우", 34, "그", "주말 목공 클래스 수강 중", "🪚"],
- ["연우", 26, "그녀", "LP 대신 카세트 모으는 중", "📼"],
- ["새봄", 25, "그들", "마라탕 맵기 단계 4", "🌶️"],
- ["찬", 30, "그", "러닝 대회 완주 메달 수집", "🏅"],
+ ["여름", 27, "그", "여름이면 물가에서 삶", "🍉"],
+ ["별", 31, "그", "별자리 앱 알림 켜두는 사람", "⭐"],
+ ["Brian", 34, "대명사 없음", "Slow walks and short notes", "📝"],
+ ["Xan", 29, "그들", "Share me your playlist", "🎹"],
+ ["정우", 37, "그", "주말 목공 클래스 수강 중", "🪚"],
+ ["연우", 29, "그녀", "LP 대신 카세트 모으는 중", "📼"],
+ ["새봄", 26, "그들", "마라탕 맵기 단계 4", "🌶️"],
+ ["찬", 32, "그", "러닝 대회 완주 메달 수집", "🏅"],
  ["짱", 27, "그", "작은 소품 가게 구경 전문", "🛍️"],
- ["Haden", 29, "그/그들", "대한미국인", "🛹"],
- ["은조", 32, "그들", "자수 놓으며 팟캐스트 듣기", "🪡"],
+ ["Haden", 28, "그/그들", "대한미국인", "🛹"],
+ ["은조", 35, "그들", "자수 놓으며 팟캐스트 듣기", "🪡"],
  ["봄", 26, "그들", "봄이면 꽃시장 투어", "🌷"],
  ["형섭", 28, "그", "커피 원두 로스팅 입문", "🫘"]
 ];
@@ -951,7 +971,7 @@ function pv(p,id){
 }
 
 /* 좋아요 / 채팅 더미 데이터 */
-const incomingIds=[9,16,28,36,43], matchedIds=[3,22];
+const incomingIds=[9,16,28,36,43];
 let firstRefreshDone=false;
 let reserveIds=[12,41];       // 새로고침하면 한 명씩 나를 좋아한 사람으로 들어와요 (시연용)
 const chats={}; let chatOrder=[];
@@ -996,10 +1016,6 @@ function initSocial(){
 function arrivals(){
   const offs=[3*36e5,20*6e4,26*36e5,6*36e5,2*36e5];
   incomingIds.forEach((id,i)=>{ const p=profiles[id]; if(p.liked||p.matched) return; p.incoming=true; p.likedMeAt=Date.now()-offs[i]; });
-  matchedIds.forEach(id=>{ const p=profiles[id]; if(p.liked) return; p.matched=true; });
-  chatOrder=matchedIds.filter(id=>profiles[id].matched).reverse();      // 안 읽은 메시지가 있는 가온이 맨 위
-  chats[3]={msgs:[{t:'러닝 크루 얘기 재밌었어요 ㅎㅎ'},{me:true,t:'맞아요! 이번 주말에도 뛰세요?'},{t:'네, 느긋하게 한강에서요'}],unread:0};
-  chats[22]={msgs:[{t:'야간 자전거 같이 타볼래요?'}],unread:1};
 }
 initSocial();
 
@@ -1221,7 +1237,7 @@ function buildField(){
 
   world.insertAdjacentHTML('beforeend','<i class="snapgrid" id="snapGrid"></i><i class="gl v"></i><i class="gl h"></i>');
   // 격자 간격은 스냅 단위와 같아요 (요소 크기가 world의 3배라서 3으로 나눠요)
-  $('#snapGrid').style.backgroundSize=`${stepOf(state.x)/3*100}% ${stepOf(state.y)/3*100}%`;
+  $('#snapGrid').style.backgroundSize=`${stepOf(state.x)/(state.x==='height'?1:3)*100}% ${stepOf(state.y)/(state.y==='height'?1:3)*100}%`;
 
   const sw=($('#stage').clientWidth||330)*.88/vw(), shh=($('#stage').clientHeight||600)*.88/vw(), R=19;
   plotted.forEach(p=>{
@@ -1476,6 +1492,20 @@ function stripHTML(p,ax){
     <div class="ends"><span>${ax.a}</span><span>${ax.b}</span></div>
   </div>`;
 }
+function basisHTML(p,mode){
+  if(mode!=='rec') return '';
+  const cell=ax=>{
+    const A=pv(p,ax.id);
+    if(!A) return `<div class="bs off"><span class="bn">${ax.name}</span><b>표시 안 함</b></div>`;
+    let val,st='';
+    if(ax.kind) val=valP(p,ax);
+    else { const c=mid(A); val=c<.36?`${ax.a} 쪽`:(c>.64?`${ax.b} 쪽`:'가운데 근처'); }
+    const B=ensurePref(ax.id), c=mid(A);
+    st=(c>=B.lo-EPS&&c<=B.hi+EPS)?'in':'out';
+    return `<div class="bs ${st}"><span class="bn">${ax.name}</span><b>${esc(val)}</b><i>${st==='in'?'범위 안':'범위 밖'}</i></div>`;
+  };
+  return `<div class="basis" role="group" aria-label="지금 보고 있는 두 기준">${cell(axisById(state.x))}${cell(axisById(state.y))}</div>`;
+}
 function openProfile(id,mode){
   mode=mode||'rec';
   const p=profiles[id];
@@ -1490,20 +1520,21 @@ function openProfile(id,mode){
   const head=ph
     ?`<img class="hero" src="${ph}" alt=""><h2>${esc(p.name)}, ${p.age}</h2>${prons}`
     :`<div class="pf-head">${avatarHTML(p)}<div><h2>${esc(p.name)}, ${p.age}</h2>${prons}</div></div>`;
-  const acts=mode==='out'
+  const acts=mode==='view'?'':mode==='out'
     ?`<div class="acts"><button class="btn" id="cancelBtn">좋아요 취소</button></div>`
     :(mode==='rec'
       ?`<div class="acts"><button class="btn" id="hideBtn" style="flex:1">숨기기</button><button class="btn kbtn" id="keepBtn" aria-pressed="${p.kept}" style="flex:1.25"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 17l-5.2 2.7 1-5.9L3.5 9.7l5.9-.8z"/></svg><span class="kl">${p.kept?'기억함':'기억하기'}</span></button><button class="btn primary" id="likeBtn" style="flex:1.6">마음에 들어요</button></div>`
       :`<div class="acts"><button class="btn" id="hideBtn">숨기기</button><button class="btn primary" id="likeBtn">마음에 들어요</button></div>`);
   ctx.p=p; ctx.mode=mode; ctx.ready=false; ctx.armed=false; clearTimeout(ctx.timer);
-  openSheet(`<div class="grab"></div>${head}
+  openSheet(`<div class="grab"></div>${basisHTML(p,mode)}${head}
     ${p.job?`<div class="job">${esc(p.job)}</div>`:''}${p.tags&&p.tags.length?`<div class="tags">${p.tags.map(t=>`<span class="tg">${esc(t)}</span>`).join('')}</div>`:''}
     <p class="bio">${esc(p.bio)}</p>
     ${nn?`<p class="ov">내 범위와 겹침 <b>${ov}/${nn}</b></p>`:''}
     ${axes.map(a=>stripHTML(p,a)).join('')}
     ${acts}
-    ${mode==='out'?'':`<div class="throw" id="throwHint"><span class="arrow" aria-hidden="true">↑</span><span class="tt">위로 스와이프해서 좋아요</span></div>`}`);
-  if(mode==='out'){ $('#cancelBtn').onclick=()=>cancelOut(p); }
+    ${(mode==='out'||mode==='view')?'':`<div class="throw" id="throwHint"><span class="arrow" aria-hidden="true">↑</span><span class="tt">위로 스와이프해서 좋아요</span></div>`}`);
+  if(mode==='view'){ }
+  else if(mode==='out'){ $('#cancelBtn').onclick=()=>cancelOut(p); }
   else{
     $('#hideBtn').onclick=()=>mode==='in'?declineIncoming(p):hideProfile(p);
     $('#likeBtn').onclick=()=>mode==='in'?acceptIncoming(p):likeProfile(p);
@@ -1549,7 +1580,7 @@ function likeProfile(p){
 }
 // 끝까지 읽고 위로 세게 밀면 날아가듯 닫히며 전송
 function throwLike(){
-  const p=ctx.p; if(!p||!ctx.ready||ctx.mode==='out') return;
+  const p=ctx.p; if(!p||!ctx.ready||ctx.mode==='out'||ctx.mode==='view') return;
   const mode=ctx.mode; ctx.ready=false;
   const sh=$('#sheet');
   heartFly();
@@ -1657,7 +1688,7 @@ const draftMemo={}, meMemo={};      // 마지막으로 정했던 범위: '표시
 function trackBlock(ax,mode){
   const own=mode!=='pref', req=own&&REQUIRED.includes(ax.id), optional=own&&!req;
   return `<section class="trk ${own?'self':'pref'}" data-ax="${ax.id}">
-    <div class="trk-h"><b>${ax.name}${req?'<em class="req">필수</em>':''}</b><span class="rt"><span class="mdesc"></span>${optional?'<label class="offck"><input type="checkbox" aria-label="표시 안 함"><span>표시 안 함</span></label>':''}</span></div>
+    <div class="trk-h"><b>${ax.name}${req?'<span class="star" title="필수" aria-label="필수">*</span>':''}</b><span class="rt"><span class="mdesc"></span>${optional?'<label class="offck"><input type="checkbox" aria-label="표시 안 함"><span>표시 안 함</span></label>':''}</span></div>
     <div class="mtrack"><div class="mbar"><div class="mh l"></div><div class="mh r"></div><span class="na" aria-hidden="true"><svg viewBox="0 0 40 14"><path d="M3 7h34M9 2L3 7l6 5M31 2l6 5-6 5"/></svg></span></div></div>
     ${tickRow(ax)}
     <div class="mends"><span>${ax.a}</span><span>${ax.b}</span></div>
@@ -1797,13 +1828,22 @@ function renderChatList(){
 let chatId=null;
 function renderMsgs(){
   const box=$('#msgs');
-  box.innerHTML=chats[chatId].msgs.map(m=>`<div class="msg${m.sys?' sys':(m.me?' mine':'')}">${esc(m.t)}</div>`).join('');
+  const cp=profiles[chatId], ms=chats[chatId].msgs;
+  box.innerHTML=ms.map((m,i)=>{
+    if(m.sys||m.me) return `<div class="msg${m.sys?' sys':' mine'}">${esc(m.t)}</div>`;
+    const nx=ms[i+1], last=!(nx&&!nx.sys&&!nx.me);
+    return `<div class="mrow"><button class="mav${last?'':' sp'}" aria-label="${esc(cp.name)} 프로필 보기"${last?'':' tabindex="-1"'}>${avatarHTML(cp)}</button><div class="msg">${esc(m.t)}</div></div>`;
+  }).join('');
+  $$('#msgs .mav:not(.sp)').forEach(b=>b.onclick=openChatProfile);
   box.scrollTop=box.scrollHeight;
 }
+function openChatProfile(){ if(chatId==null) return; openProfile(chatId,'view'); }
 function openChat(id){
   chatId=id; const p=profiles[id];
+  { const pg=$('#pageChat'); pg.style.height=''; pg.style.bottom=''; }
   chats[id].unread=0; chats[id].isNew=false; updateBadges();
-  $('#chatHead').innerHTML=`${avatarHTML(p)}<h2 style="margin:0;font-size:17px">${esc(p.name)}</h2>`;
+  $('#chatHead').innerHTML=`<button class="chat-who" id="chatWho" aria-label="${esc(p.name)} 프로필 보기">${avatarHTML(p)}<h2 style="margin:0;font-size:17px">${esc(p.name)}</h2></button>`;
+  $('#chatWho').onclick=openChatProfile;
   renderMsgs(); openPage('pageChat');
 }
 function sendMsg(){
@@ -2088,7 +2128,7 @@ function onbPhotoUpdate(){
 function sliderStep(group,title,sub,required){
   return {title,sub,
     render(c){
-      c.innerHTML=axes.filter(a=>!a.kind&&a.group===group).map(a=>trackBlock(a,'self')).join('');
+      c.innerHTML=axes.filter(a=>!a.kind&&a.group===group).map(a=>trackBlock(a,'self')).join('')+(required.length?'<p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>':'');
       $$('#onbC .trk').forEach(b=>bindTrack(b,axisById(b.dataset.ax),'draft',updateOnbNext));
     },
     valid:()=>required.every(id=>!!draftMe[id])};
@@ -2104,7 +2144,7 @@ const STEPS=[
     valid:()=>true, label:()=>'시작해볼까요?'},
   {title:'이름이나 닉네임을\n입력해 주세요',sub:'당신을 뭐라고 부르길 바라나요?',
     render(c){
-      c.innerHTML=`<input class="inp big" id="oName" maxlength="12" placeholder="이름" value="${esc(draft.name)}" autocomplete="off" aria-label="이름">`;
+      c.innerHTML=`<div class="fld"><label for="oName">이름<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oName" maxlength="12" placeholder="이름" value="${esc(draft.name)}" autocomplete="off"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
       const i=$('#oName');
       i.oninput=()=>{draft.name=i.value;updateOnbNext()};
       i.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing) onbNext()});
@@ -2113,8 +2153,8 @@ const STEPS=[
     valid:()=>draft.name.trim().length>0},
   {title:'나이와 키를\n알려 주세요',sub:'나중에 언제든 바꿀 수 있어요.',
     render(c){
-      c.innerHTML=`<div class="fld"><label for="oAge">나이</label><input class="inp big" id="oAge" type="number" inputmode="numeric" min="18" max="80" placeholder="예: 27" value="${esc(draft.age)}"></div>
-        <div class="fld"><label for="oH">키 (cm)</label><input class="inp big" id="oH" type="number" inputmode="numeric" min="140" max="210" placeholder="예: 168" value="${esc(draft.height)}"></div>`;
+      c.innerHTML=`<div class="fld"><label for="oAge">나이<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oAge" type="number" inputmode="numeric" min="18" max="80" placeholder="예: 27" value="${esc(draft.age)}"></div>
+        <div class="fld"><label for="oH">키 (cm)<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oH" type="number" inputmode="numeric" min="140" max="210" placeholder="예: 168" value="${esc(draft.height)}"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
       const a=$('#oAge'), h=$('#oH');
       a.oninput=()=>{draft.age=a.value;updateOnbNext()};
       h.oninput=()=>{draft.height=h.value;updateOnbNext()};
@@ -2368,7 +2408,7 @@ $('#meTog').onchange=e=>{
   const mk=$('#meMark'); if(mk) mk.hidden=!state.showMe;
 };
 $('#snapTog').onclick=()=>setSnap(!state.snap);
-$('#prefBtn').onclick=openPref;
+$('#prefBtn').onclick=openPref; $('#prefBtnList').onclick=openPref;
 $('#prefBack').onclick=closePref;
 $('#gearBtn').onclick=openSettings;
 $('#setBack').onclick=()=>closePage('pageSettings');
@@ -2376,6 +2416,24 @@ $('#phBack').onclick=()=>closePage('pagePhotos');
 $('#chatBack').onclick=()=>{closePage('pageChat');renderChatList()};
 $('#msgSend').onclick=sendMsg;
 $('#msgInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing) sendMsg()});
+/* 키보드가 올라와도 입력창이 키보드 바로 위에 붙어 있도록, 보이는 화면(visualViewport) 크기에 채팅방을 맞춰요 */
+(function(){
+  const vv=window.visualViewport; if(!vv) return;
+  const page=$('#pageChat'), comp=$('.composer',page);
+  function fit(){
+    if(page.hidden) return;
+    const top=$('.phone').getBoundingClientRect().top;
+    const kb=window.innerHeight-vv.height-vv.offsetTop>80;
+    comp.classList.toggle('kb',kb);
+    if(kb){ page.style.height=Math.max(220,vv.height+vv.offsetTop-top)+'px'; page.style.bottom='auto'; }
+    else { page.style.height=''; page.style.bottom=''; }
+    const box=$('#msgs'); box.scrollTop=box.scrollHeight;
+  }
+  vv.addEventListener('resize',fit);
+  vv.addEventListener('scroll',()=>{ if(!page.hidden&&window.scrollY) window.scrollTo(0,0); fit(); });
+  $('#msgInp').addEventListener('focus',()=>setTimeout(fit,250));
+  $('#msgInp').addEventListener('blur',()=>setTimeout(fit,250));
+})();
 $('#recenter').onclick=()=>{
   const lx=limits(state.x), ly=limits(state.y);
   animateTo(clamp(mid(zx())-vw()/2,lx[0],lx[1]), clamp(mid(zy())-vw()/2,ly[0],ly[1]));

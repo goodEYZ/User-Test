@@ -294,6 +294,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .mh.l::after{left:14px}.mh.r::after{right:14px}
 .mends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin:0 8px}
 .trk .tkrow{margin:0 8px}
+.autosave{margin:18px 0 8px;text-align:center;font-size:12px;color:var(--ink2);opacity:.6}
+.cropper{position:absolute;inset:0;z-index:70;background:#14111F;color:#fff;display:flex;flex-direction:column}
+.cr-top{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 6px;font-size:15px}
+.cr-b{border:0;background:none;color:#fff;font-size:15px;padding:0 10px;min-height:44px;cursor:pointer}
+.cr-ok{font-weight:700;color:#B8C2FF}
+.cr-stage{flex:1;min-height:0;display:grid;place-items:center;padding:12px}
+.cr-win{position:relative;overflow:hidden;background:#000;touch-action:none;cursor:grab;outline:2px solid rgba(255,255,255,.9)}
+.cr-win img{position:absolute;left:0;top:0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.cr-win::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent calc(33.3% - .5px),rgba(255,255,255,.35) calc(33.3% - .5px) calc(33.3% + .5px),transparent calc(33.3% + .5px) calc(66.6% - .5px),rgba(255,255,255,.35) calc(66.6% - .5px) calc(66.6% + .5px),transparent calc(66.6% + .5px)),linear-gradient(0deg,transparent calc(33.3% - .5px),rgba(255,255,255,.35) calc(33.3% - .5px) calc(33.3% + .5px),transparent calc(33.3% + .5px) calc(66.6% - .5px),rgba(255,255,255,.35) calc(66.6% - .5px) calc(66.6% + .5px),transparent calc(66.6% + .5px))}
+.cr-ctl{display:flex;align-items:center;gap:12px;padding:6px 28px}
+.cr-ctl input{flex:1;accent-color:#B8C2FF}
+.cr-hint{text-align:center;font-size:12px;color:rgba(255,255,255,.6);margin:6px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 .reset{display:block;margin:28px auto 6px;border:0;background:none;color:var(--ink2);text-decoration:underline;font-size:13px;cursor:pointer;padding:10px}
 
 /* 프로필 탭 */
@@ -359,7 +371,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .msg.mine{align-self:flex-end;background:var(--ink);color:var(--ground)}
 .msg.sys{align-self:center;background:none;color:var(--ink2);font-size:12px}
 .composer{display:flex;gap:8px;padding:10px 14px 14px;border-top:1px solid var(--line);background:var(--surface)}
+.composer{align-items:flex-end}
 .composer .inp{flex:1}
+.composer textarea.inp{display:block;resize:none;padding:11px 12px;line-height:22px;min-height:44px;max-height:134px;overflow-y:auto}
 .composer .btn{flex:none;min-height:44px;padding:0 18px;font-size:14px}
 .pg-h .avatar{width:38px;height:38px;font-size:19px}
 
@@ -592,7 +606,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       </header>
       <div class="meta" id="meta"></div>
       <div class="opts">
-        <div class="opts-l"><button class="chip" id="prefBtnList">모든 기준 범위 설정</button><button class="chip" id="unmarkChip" hidden>미표기 0명</button></div>
+        <div class="opts-l"><button class="chip" id="prefBtnList">모든 기준 범위 설정</button><button class="chip" id="unmarkChip" hidden>이 항목 표시 안 함 0명</button></div>
         <button class="fab" id="prefBtn" aria-label="선호 범위 설정"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 14h14"/><circle cx="7" cy="6" r="2.2" fill="#fff"/><circle cx="13" cy="14" r="2.2" fill="#fff"/></svg></button>
       </div>
     </div>
@@ -668,7 +682,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
   <div class="page" id="pageChat" hidden>
     <div class="pg-h"><button class="back" id="chatBack" aria-label="뒤로">‹</button><div id="chatHead" style="display:flex;gap:10px;align-items:center"></div></div>
     <div class="msgs" id="msgs"></div>
-    <div class="composer"><input class="inp" id="msgInp" placeholder="메시지 보내기" aria-label="메시지"><button class="btn primary" id="msgSend">보내기</button></div>
+    <div class="composer"><textarea class="inp" id="msgInp" rows="1" placeholder="메시지 보내기" aria-label="메시지" enterkeyhint="send"></textarea><button class="btn primary" id="msgSend">보내기</button></div>
   </div>
 
 
@@ -716,6 +730,12 @@ input,textarea{-webkit-user-select:text;user-select:text}
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
   <div class="toast" id="toast" role="status"></div>
+  <div class="cropper" id="cropper" hidden role="dialog" aria-modal="true" aria-label="사진 자르기">
+    <div class="cr-top"><button class="cr-b" id="crCancel">취소</button><b>사진 자르기</b><button class="cr-b cr-ok" id="crOk">완료</button></div>
+    <div class="cr-stage"><div class="cr-win" id="crWin"><img id="crImg" alt="" draggable="false"></div></div>
+    <div class="cr-ctl"><span aria-hidden="true">−</span><input type="range" id="crZoom" min="1" max="4" step="0.01" value="1" aria-label="확대"><span aria-hidden="true">+</span></div>
+    <p class="cr-hint">끌어서 위치를, 두 손가락이나 슬라이더로 크기를 정해요</p>
+  </div>
   <input class="vh" type="file" id="fileOne" accept="image/*" tabindex="-1" aria-hidden="true">
   <input class="vh" type="file" id="fileMany" accept="image/*" multiple tabindex="-1" aria-hidden="true">
 </div>
@@ -826,7 +846,7 @@ function meRange(id){
   if(ax.kind){const v=ax.kind==='dist'?0:.5;return {lo:v,hi:v}}
   return me[id]||null;
 }
-const REQUIRED=['gender','lead'];
+const REQUIRED=['gender'];
 // 내 정보가 설정된 축만 필터로 쓸 수 있어요
 function isSet(id){
   const ax=axisById(id);
@@ -1009,7 +1029,7 @@ function initSocial(){
   Object.keys(chats).forEach(k=>delete chats[k]);
   reserveIds=[12,41];
   firstRefreshDone=false;
-  profiles.forEach(p=>{p.incoming=false;p.matched=false;p.liked=false;p.kept=false;p.keptAt=0;p.penalty=0;p.likedAt=0;p.likedMeAt=0});
+  profiles.forEach(p=>{p.incoming=false;p.matched=false;p.liked=false;p.kept=false;p.keptAt=0;p.penalty=0;p.likedAt=0;p.likedMeAt=0;p.viewedAt=0});
   chatOrder=[];
 }
 // 최초 새로고침에 나를 좋아한 사람과 매칭된 채팅이 도착해요 (시연용)
@@ -1082,14 +1102,62 @@ function toSquare(file,size){
     img.src=url;
   });
 }
+/* 사진 자르기: 끌어서 위치, 두 손가락/휠/슬라이더로 크기를 정해요. 완료하면 정사각형으로 잘라 돌려줘요 */
+function openCropper(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('load')); };
+    img.onload=()=>{
+      const root=$('#cropper'), win=$('#crWin'), im=$('#crImg'), zr=$('#crZoom'), st=$('.cr-stage',root);
+      root.hidden=false;
+      const V=Math.max(160,Math.min(st.clientWidth-24,st.clientHeight-24,380));
+      win.style.width=win.style.height=V+'px';
+      const w=img.naturalWidth, h=img.naturalHeight, s0=Math.max(V/w,V/h);
+      let z=1, ox=0, oy=0;
+      im.src=url;
+      const apply=()=>{
+        const s=s0*z, mx=Math.max(0,(w*s-V)/2), my_=Math.max(0,(h*s-V)/2);
+        ox=clamp(ox,-mx,mx); oy=clamp(oy,-my_,my_);
+        im.style.width=w*s+'px'; im.style.height=h*s+'px';
+        im.style.transform=`translate(${(V-w*s)/2+ox}px,${(V-h*s)/2+oy}px)`;
+        zr.value=z;
+      };
+      const setZoom=nz=>{ nz=clamp(nz,1,4); const k=nz/z; ox*=k; oy*=k; z=nz; apply(); };
+      const ptrs=new Map(); let last=null, pd=0;
+      win.onpointerdown=e=>{ try{ win.setPointerCapture(e.pointerId); }catch(_){} ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); last={x:e.clientX,y:e.clientY}; if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pd=Math.hypot(a.x-b.x,a.y-b.y)||1; } };
+      win.onpointermove=e=>{
+        if(!ptrs.has(e.pointerId)) return;
+        ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(ptrs.size>=2){ const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y)||1; setZoom(z*d/pd); pd=d; }
+        else if(last){ ox+=e.clientX-last.x; oy+=e.clientY-last.y; last={x:e.clientX,y:e.clientY}; apply(); }
+      };
+      const up=e=>{ ptrs.delete(e.pointerId); const r=[...ptrs.values()][0]; last=r?{x:r.x,y:r.y}:null; };
+      win.onpointerup=up; win.onpointercancel=up;
+      win.onwheel=e=>{ e.preventDefault(); setZoom(z*Math.exp(-e.deltaY*.0015)); };
+      zr.oninput=()=>setZoom(+zr.value);
+      apply();
+      const done=data=>{ root.hidden=true; im.removeAttribute('src'); URL.revokeObjectURL(url); document.removeEventListener('keydown',onKey); resolve(data); };
+      const onKey=e=>{ if(e.key==='Escape') done(null); };
+      document.addEventListener('keydown',onKey);
+      $('#crCancel').onclick=()=>done(null);
+      $('#crOk').onclick=()=>{
+        const s=s0*z, left=(V-w*s)/2+ox, top=(V-h*s)/2+oy, c=document.createElement('canvas');
+        c.width=c.height=480;
+        c.getContext('2d').drawImage(img,-left/s,-top/s,V/s,V/s,0,0,480,480);
+        done(c.toDataURL('image/jpeg',.82));
+      };
+    };
+    img.src=url;
+  });
+}
 function avatarHTML(p,extra){
   const ph=photos['p'+p.id];
   return `<div class="avatar ${extra||''}">${ph?`<img src="${ph}" alt="">`:p.emoji}</div>`;
 }
 let storageWarned=false;
-async function savePhoto(key,file){
+async function savePhoto(key,file,pre){
   try{
-    const data=await toSquare(file);
+    const data=pre||await toSquare(file);
     photos[key]=data;
     const ok=await DB.set(key,data);
     if(!ok&&!storageWarned){storageWarned=true;toast('이 기기에서는 저장이 안 돼요. 새로고침하면 사라져요')}
@@ -1233,7 +1301,8 @@ function buildField(){
   buildTicks();
   profiles.forEach(p=>{p.el=null;p.eb=null});
   shown=visible();
-  const plotted=shown.filter(p=>pv(p,state.x)&&pv(p,state.y));
+  // 열어 본 사람은 뒤로 보내요(가장 최근에 본 사람이 맨 뒤). 아직 안 본 사람이 위에 와서 겹친 곳에서도 눌러 볼 수 있어요
+  const plotted=shown.filter(p=>pv(p,state.x)&&pv(p,state.y)).sort((a,b)=>(a.viewedAt?-a.viewedAt:0)-(b.viewedAt?-b.viewedAt:0));
 
   world.insertAdjacentHTML('beforeend','<i class="snapgrid" id="snapGrid"></i><i class="gl v"></i><i class="gl h"></i>');
   // 격자 간격은 스냅 단위와 같아요 (요소 크기가 world의 3배라서 3으로 나눠요)
@@ -1308,14 +1377,14 @@ function updateRanges(){
 function updateUnmarked(){
   const b=$('#unmarkChip'); if(!b) return;
   const n=shown.filter(p=>!(pv(p,state.x)&&pv(p,state.y))).length;
-  b.hidden=n===0; b.textContent=`미표기 ${n}명`;
+  b.hidden=n===0; b.textContent=`이 항목 표시 안 함 ${n}명`;
 }
 function openUnmarked(){
   const X=axisById(state.x), Y=axisById(state.y);
   const arr=shown.filter(p=>!(pv(p,state.x)&&pv(p,state.y)));
-  openSheet(`<div class="grab"></div><h2>미표기 ${arr.length}명</h2><div style="margin-top:6px">${arr.map(p=>{
+  openSheet(`<div class="grab"></div><h2>이 항목 표시 안 함 ${arr.length}명</h2><div style="margin-top:6px">${arr.map(p=>{
     const miss=[X,Y].filter(a=>!pv(p,a.id)).map(a=>a.name).join(', ');
-    return `<button class="row flat" data-id="${p.id}">${avatarHTML(p)}<div class="t"><b>${esc(p.name)}, ${p.age}</b><span>${miss} 표시 안 함</span></div></button>`;
+    return `<button class="row flat" data-id="${p.id}"><div class="avatar">${p.emoji}</div><div class="t"><b>${esc(p.name)}, ${p.age}</b><span>${miss} 표시 안 함</span></div></button>`;
   }).join('')}</div>`);
   $$('#sheet .row').forEach(r=>r.onclick=()=>openProfile(+r.dataset.id,'rec'));
 }
@@ -1405,10 +1474,10 @@ function renderList(){
     return `<button class="row${t===0?' out':''}" data-id="${p.id}">
       <div class="avatar">${p.emoji}</div>
       <div class="t"><b>${esc(p.name)}, ${p.age}</b><span>${X.name}: ${show(p,X)} · ${Y.name}: ${show(p,Y)}</span></div>
-      ${t===2?'<span class="badge">범위 안</span>':(t===1?'<span class="badge soft">일부 겹침</span>':(t===-1?'<span class="badge soft">미표기</span>':''))}
+      ${t===2?'<span class="badge">범위 안</span>':(t===1?'<span class="badge soft">일부 겹침</span>':(t===-1?'<span class="badge soft">표시 안 함</span>':''))}
     </button>`;
   }).join('');
-  $$('#list .row').forEach(r=>r.addEventListener('click',()=>{ const p=profiles[+r.dataset.id]; if(tier(p)===0) nudge(r); else openProfile(p.id,'rec'); }));
+  $$('#list .row').forEach(r=>r.addEventListener('click',()=>{ openProfile(+r.dataset.id,'rec'); }));
 }
 function setView(v){
   state.view=v;
@@ -1514,6 +1583,11 @@ function openProfile(id,mode){
     if(q.el) q.el.classList.toggle('sel',on); if(q.eb) q.eb.classList.toggle('sel',on);
   });
   state.selected=(mode==='rec'&&p.el)?id:null; updateRanges();
+  if(mode==='rec'){
+    p.viewedAt=Date.now();
+    const first=p.el&&p.el.parentNode&&p.el.parentNode.querySelector('.dot');
+    if(first&&first!==p.el) p.el.parentNode.insertBefore(p.el,first);
+  }
   const [ov,nn]=overlapStats(p);
   const ph=photos['p'+p.id];
   const prons=`<div class="prons">${p.pron.split('/').map(x=>`<span class="pron">${x}</span>`).join('')}</div>`;
@@ -1747,7 +1821,7 @@ function bindTrack(block,ax,mode,onChange){
 /* ---------- 선호 범위 페이지 ---------- */
 function openPref(){
   $('#prefBody').innerHTML=GROUPS.map((g,gi)=>`<div class="grp">${g}</div>`+axes.filter(a=>a.group===gi).map(a=>trackBlock(a,'pref')).join('')).join('')
-    +`<button class="reset" id="prefReset">초기화</button>`;
+    +`<button class="reset" id="prefReset">초기화</button><p class="autosave">모든 내용은 자동 저장 됩니다.</p>`;
   $$('#prefBody .trk').forEach(b=>{
     const ax=axisById(b.dataset.ax);
     if(!isSet(ax.id)){ b.classList.add('locked'); b.innerHTML=`<div class="trk-h"><b>${ax.name}</b>${SETBTN}</div>`; b.onclick=()=>goSetAxis(ax.id); }
@@ -1840,7 +1914,7 @@ function renderMsgs(){
 function openChatProfile(){ if(chatId==null) return; openProfile(chatId,'view'); }
 function openChat(id){
   chatId=id; const p=profiles[id];
-  { const pg=$('#pageChat'); pg.style.height=''; pg.style.bottom=''; }
+  { const pg=$('#pageChat'); pg.style.height=''; pg.style.bottom=''; const mi=$('#msgInp'); mi.value=''; mi.style.height=''; }
   chats[id].unread=0; chats[id].isNew=false; updateBadges();
   $('#chatHead').innerHTML=`<button class="chat-who" id="chatWho" aria-label="${esc(p.name)} 프로필 보기">${avatarHTML(p)}<h2 style="margin:0;font-size:17px">${esc(p.name)}</h2></button>`;
   $('#chatWho').onclick=openChatProfile;
@@ -1848,7 +1922,7 @@ function openChat(id){
 }
 function sendMsg(){
   const inp=$('#msgInp'), t=inp.value.trim(); if(!t||chatId==null) return;
-  chats[chatId].msgs.push({me:true,t}); inp.value=''; renderMsgs();
+  chats[chatId].msgs.push({me:true,t}); inp.value=''; inp.style.height=''; renderMsgs();
   chatOrder=[chatId,...chatOrder.filter(x=>x!==chatId)];
 }
 
@@ -1898,7 +1972,7 @@ const ED={
   name:{label:'이름',type:'text',max:12,ph:'이름을 입력해 주세요',get:()=>my.name,set:v=>{v=v.trim();if(v) my.name=v}},
   bio:{label:'자기소개',type:'area',max:120,ph:'자기소개를 입력해 주세요',get:()=>my.bio,set:v=>{my.bio=v.trim()}},
   age:{label:'나이',type:'num',min:18,max:80,get:()=>my.age,fmt:v=>`${v}세`,set:v=>{const n=parseInt(v,10);if(n>=18&&n<=80) my.age=n}},
-  height:{label:'키',type:'num',min:140,max:210,get:()=>my.height,fmt:v=>`${v}cm`,set:v=>{ const n=parseInt(v,10); if(n>=140&&n<=210) my.height=n; }},
+  height:{label:'키',type:'num',min:140,max:210,ph:'표시 안 함',get:()=>my.height,fmt:v=>`${v}cm`,set:v=>{ const n=parseInt(v,10); if(n>=140&&n<=210) my.height=n; else if(String(v).trim()==='') my.height=null; }},
   job:{label:'직업',type:'text',max:20,ph:'표시 안 함',get:()=>my.job,set:v=>{my.job=v.trim()}}
 };
 function edText(k){const c=ED[k],v=c.get();return v?esc(c.fmt?c.fmt(v):v):c.ph}
@@ -1992,7 +2066,8 @@ function renderProfileTab(){
     </div>
     <div class="pf-sec" style="padding-top:8px">
       ${GROUPS.map((g,gi)=>gi===0?'':(`<div class="grp">${g}</div>`+own.filter(a=>a.group===gi).map(a=>trackBlock(a,'self')).join(''))).join('')}
-    </div>`;
+    </div>
+    <p class="autosave">모든 내용은 자동 저장 됩니다.</p>`;
   updateMeHero(); renderTagsRow();
   $('#mePhoto').onclick=()=>{photoTarget='me';$('#fileOne').click()};
   bindEditables();
@@ -2154,12 +2229,12 @@ const STEPS=[
   {title:'나이와 키를\n알려 주세요',sub:'나중에 언제든 바꿀 수 있어요.',
     render(c){
       c.innerHTML=`<div class="fld"><label for="oAge">나이<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oAge" type="number" inputmode="numeric" min="18" max="80" placeholder="예: 27" value="${esc(draft.age)}"></div>
-        <div class="fld"><label for="oH">키 (cm)<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oH" type="number" inputmode="numeric" min="140" max="210" placeholder="예: 168" value="${esc(draft.height)}"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
+        <div class="fld"><label for="oH">키 (cm)<em class="req">선택</em></label><input class="inp big" id="oH" type="number" inputmode="numeric" min="140" max="210" placeholder="예: 168" value="${esc(draft.height)}"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
       const a=$('#oAge'), h=$('#oH');
       a.oninput=()=>{draft.age=a.value;updateOnbNext()};
       h.oninput=()=>{draft.height=h.value;updateOnbNext()};
     },
-    valid(){ const a=parseInt(draft.age,10), h=parseInt(draft.height,10); return a>=18&&a<=80&&h>=140&&h<=210; }},
+    valid(){ const a=parseInt(draft.age,10), hv=String(draft.height).trim(), h=parseInt(hv,10); return a>=18&&a<=80&&(hv===''||(h>=140&&h<=210)); }},
   {title:'나를 부르는 말을\n골라 주세요',sub:'나를 가장 잘 나타내는 방법을 골라 보세요.',
     render(c){
       const pronOpts=['그','그녀','그들','대명사 없음'];
@@ -2189,10 +2264,10 @@ const STEPS=[
   {title:'자기소개를\n적어 주세요',sub:'짧아도 괜찮아요. 한두 문장이면 충분해요.',
     render(c){
       c.innerHTML=`<textarea class="ta big" id="oBio" rows="5" maxlength="120" placeholder="자유롭게 적어 주세요" aria-label="자기소개">${esc(draft.bio)}</textarea><div class="cnt2" id="oBioN">${draft.bio.length}/120</div>`;
-      const t=$('#oBio'); t.oninput=()=>{ draft.bio=t.value; $('#oBioN').textContent=`${t.value.length}/120`; };
+      const t=$('#oBio'); t.oninput=()=>{ draft.bio=t.value; $('#oBioN').textContent=`${t.value.length}/120`; updateOnbNext(); };
       setTimeout(()=>t.focus(),60);
     },
-    valid:()=>true},
+    valid:()=>true, label:()=>draft.bio.trim()?'다음':'건너뛰기'},
   {title:'사진을\n올려 주세요',sub:'나를 나타내는 자연스러운 사진을 올려 주세요.',
     render(c){
       c.innerHTML=`<button class="ob-photo" id="oPhoto" aria-label="사진 고르기"></button>`;
@@ -2245,7 +2320,7 @@ function skipOnboarding(){
   state.x='gender'; state.y='lead'; setTab('explore');
 }
 function finishOnboarding(){
-  my.name=draft.name.trim(); my.age=parseInt(draft.age,10); my.height=parseInt(draft.height,10);
+  my.name=draft.name.trim(); my.age=parseInt(draft.age,10); { const hh=parseInt(draft.height,10); my.height=(hh>=140&&hh<=210)?hh:null; }
   my.emoji=draft.emoji; my.pron=new Set(draft.pron); my.job=draft.job.trim(); my.tags=[...draft.tags]; my.bio=draft.bio.trim(); my.loc=!!draft.loc;
   axes.forEach(a=>{ if(!a.kind) me[a.id]=draftMe[a.id]?{...draftMe[a.id]}:null; });
   Object.keys(meMemo).forEach(k=>delete meMemo[k]); Object.assign(meMemo,draftMemo);
@@ -2410,7 +2485,14 @@ $('#setBack').onclick=()=>closePage('pageSettings');
 $('#phBack').onclick=()=>closePage('pagePhotos');
 $('#chatBack').onclick=()=>{closePage('pageChat');renderChatList()};
 $('#msgSend').onclick=sendMsg;
-$('#msgInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing) sendMsg()});
+const msgInp=$('#msgInp');
+function growMsg(){
+  msgInp.style.height='auto';
+  msgInp.style.height=Math.min(msgInp.scrollHeight+2,134)+'px';
+  const box=$('#msgs'); box.scrollTop=box.scrollHeight;
+}
+msgInp.addEventListener('input',growMsg);
+msgInp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); sendMsg(); } });
 /* 키보드가 올라와도 입력창이 키보드 바로 위에 붙어 있도록, 보이는 화면(visualViewport) 크기에 채팅방을 맞춰요 */
 (function(){
   const vv=window.visualViewport; if(!vv) return;
@@ -2439,7 +2521,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closeI
 // 사진 업로드
 $('#fileOne').onchange=async e=>{
   const f=e.target.files[0]; e.target.value=''; if(!f||!photoTarget) return;
-  if(await savePhoto(photoTarget,f)){ refreshPhotoUI(); toast('사진을 저장했어요'); }
+  const target=photoTarget;
+  let data=null;
+  try{ data=await openCropper(f); }catch(err){ toast('사진을 불러오지 못했어요'); return; }
+  if(!data) return;                                   // 자르기를 취소했어요
+  if(await savePhoto(target,f,data)){ refreshPhotoUI(); toast('사진을 저장했어요'); }
 };
 $('#phMany').onclick=()=>$('#fileMany').click();
 $('#fileMany').onchange=async e=>{

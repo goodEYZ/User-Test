@@ -88,9 +88,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .ystrip .axline{width:1px;margin:6px 0}
 .xstrip .axline{height:1px;margin:0 2px}
 .end{border:0;background:rgba(255,255,255,.9);box-shadow:0 1px 6px rgba(30,20,70,.12);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);padding:6px 10px;min-height:32px;border-radius:999px;white-space:nowrap;max-width:38%;overflow:hidden;text-overflow:ellipsis}
-.ystrip .end{writing-mode:vertical-rl;padding:10px 6px;max-width:none;max-height:38%}
+.ystrip .end{writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;padding:10px 6px;max-width:none;max-height:38%}
 .apill{border:1px solid var(--line);background:rgba(255,255,255,.92);box-shadow:0 1px 6px rgba(30,20,70,.12);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:500;color:var(--ink2);cursor:pointer;min-height:32px;white-space:nowrap}
-.ystrip .apill{writing-mode:vertical-rl;padding:11px 6px}
+.ystrip .apill{writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;padding:11px 6px}
 .swap{position:absolute;left:16px;bottom:14px;z-index:8;border:1px solid var(--line);background:rgba(255,255,255,.94);box-shadow:0 1px 6px rgba(30,20,70,.14);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--ink2);padding:0}
 
 /* 유동 범위: 프로필 원에서 뻗어 나온 가지. 프로필의 진하기를 따라가요 */
@@ -384,19 +384,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 
 /* 채팅 */
 .msgs{flex:1;min-height:0;overflow:auto;padding:10px 16px;display:flex;flex-direction:column;gap:8px}
-.ice{position:relative;flex:none;margin:2px 0 8px}
-.ice-vp{overflow:hidden;border-radius:18px;background:var(--surface);border:1px solid var(--line);touch-action:pan-y;cursor:pointer}
-.ice-tr{display:flex}
-.ice-c{flex:none;width:100%;box-sizing:border-box;padding:14px 44px 26px;min-height:112px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+.ice{position:relative;flex:none;margin:2px 0 14px;padding:20px 0 22px;user-select:none;-webkit-user-select:none}
+.ice-st{position:relative;height:124px;margin-right:20px;cursor:pointer;touch-action:pan-y}
+.ice-c{position:absolute;left:0;right:0;top:0;height:124px;box-sizing:border-box;padding:14px 18px;display:flex;flex-direction:column;gap:4px;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 18px rgba(30,20,70,.14);transform-origin:0 100%;transition:transform .3s var(--ease),opacity .3s,filter .3s;overflow:hidden}
+.ice-c[data-pos="0"]{z-index:3;transform:none}
+.ice-c[data-pos="1"]{z-index:2;transform:translate(10px,-10px);filter:brightness(.985)}
+.ice-c[data-pos="2"]{z-index:1;transform:translate(20px,-20px);filter:brightness(.965)}
+.ice-c.fly{z-index:4;transform:translateX(var(--fx)) rotate(var(--fr));opacity:0;transition:transform .3s cubic-bezier(.5,0,.9,.4),opacity .3s}
+.ice-c.nt{transition:none}
 .ice-t{font-style:normal;font-size:12px;font-weight:600;color:var(--ink2)}
 .ice-h{font-size:17px;font-weight:700;letter-spacing:-.01em}
-.ice-b{font-size:13.5px;line-height:1.5;color:var(--ink)}
+.ice-b{font-size:13.5px;line-height:1.5;color:var(--ink);word-break:keep-all}
 .ice-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
 .ice-tags .tg.sh{background:var(--ink);color:#fff;border-color:var(--ink)}
-.ice-n2{display:block;margin-top:6px;font-size:12px;color:var(--ink2)}
-.ice-nav{position:absolute;top:50%;margin-top:-17px;width:34px;height:34px;border:0;background:none;font-size:26px;line-height:1;color:var(--ink2);cursor:pointer;padding:0}
-.ice-nav.prev{left:4px}.ice-nav.next{right:4px}
-.ice-dots{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;gap:5px;pointer-events:none}
+.ice-n2{display:block;margin-top:5px;font-size:12px;color:var(--ink2)}
+.ice-dots{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:5px;pointer-events:none}
 .ice-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
 .ice-dots i.on{background:var(--ink)}
 .msg{max-width:78%;padding:9px 13px;border-radius:18px;font-size:14px;line-height:1.45;background:var(--field);align-self:flex-start;word-break:break-word}
@@ -624,6 +626,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .ob-slot .ob-photo{width:100%;height:auto;aspect-ratio:1/1;border-radius:26px;margin:0}
 .axi{width:1.08em;height:1.08em;vertical-align:-.17em;margin-right:.32em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .apill .axi{margin-right:.25em}
+.ystrip .apill .axi,.ystrip .end .axi{margin:0 0 .3em;vertical-align:baseline}
 .chips.gd .chip{min-height:50px;padding:0 22px;font-size:15px}
 .gcustom{margin-top:12px;width:100%}
 .axprev{display:grid;grid-template-columns:34px minmax(0,1fr);grid-template-rows:auto auto;gap:6px 8px;width:min(100%,250px);margin:2px auto 16px}
@@ -1043,7 +1046,8 @@ function applyDemoDefaults(){
 applyDemoDefaults();
 const zx=()=>ensurePref(state.x), zy=()=>ensurePref(state.y);
 /* 거리를 세로축으로 쓸 때만 위아래를 뒤집어요(가까이가 아래, 멀리가 위). 값은 그대로 두고 화면에 놓는 자리만 뒤집어요 */
-const flipY=()=>state.y==='dist';
+const FLIP_Y=['dist','age','pace','energy'];      // 세로축일 때 앞쪽 값이 아래에 오는 축
+const flipY=()=>FLIP_Y.includes(state.y);
 const mir=r=>({lo:r4(1-r.hi),hi:r4(1-r.lo)});
 const fr=(id,r)=>(id===state.y&&flipY())?mir(r):r;            // 값 범위 -> 필드 위의 범위
 const fv=(id,v)=>(id===state.y&&flipY())?r4(1-v):v;           // 값 -> 필드 위의 위치
@@ -1242,14 +1246,17 @@ function autoMatch(p){
 }
 /* 앱 안 푸시 알림: 화면 위에서 내려와요 */
 let pushT=0;
-function pushBanner(p,text,fn){
-  const el=$('#push'); if(!el) return;
+let pushQ=[],pushBusy=false;
+function pushBanner(p,text,fn){ pushQ.push([p,text,fn]); if(!pushBusy) nextPush(); }
+function nextPush(){ const a=pushQ.shift(); if(!a){ pushBusy=false; return; } pushBusy=true; showPush(...a); }
+function showPush(p,text,fn){
+  const el=$('#push'); if(!el){ pushBusy=false; return; }
   el.innerHTML=`<div class="pv-av">${avatarHTML(p)}</div><div class="pv-t"><b>새로운 매칭</b><span>${esc(text)}</span></div><i class="pv-now">지금</i>`;
   el.onclick=()=>{ hidePush(); fn&&fn(); };
   el.hidden=false; void el.offsetWidth; el.classList.add('on');
-  clearTimeout(pushT); pushT=setTimeout(hidePush,5200);
+  clearTimeout(pushT); pushT=setTimeout(hidePush,4200);
 }
-function hidePush(){ const el=$('#push'); if(!el) return; clearTimeout(pushT); el.classList.remove('on'); setTimeout(()=>{ if(!el.classList.contains('on')) el.hidden=true; },320); }
+function hidePush(){ const el=$('#push'); if(!el) return; clearTimeout(pushT); el.classList.remove('on'); setTimeout(()=>{ if(!el.classList.contains('on')) el.hidden=true; nextPush(); },380); }
 function initSocial(){
   autoCount=0; likeN=0; profiles.forEach(p=>{ clearTimeout(p._autoT); p._will=0; p.blocked=false; });
   flt.gender={lo:0,hi:1}; flt.orient={lo:0,hi:1};
@@ -2230,7 +2237,7 @@ function renderChatList(){
 }
 let chatId=null;
 /* 매칭된 두 사람의 공통점·차이·관심사를 짚어 주는 카드 3장 (좌우로 넘기면 계속 돌아요) */
-let iceK=1;
+let iceFront=0;       // 지금 맨 앞에 있는 카드 번호
 function iceCards(p){
   const labOf=(v,a)=>v<.36?a.a:(v>.64?a.b:'가운데');
   const rows=axes.filter(a=>!a.kind&&me[a.id]&&pv(p,a.id)).map(a=>{ const m=mid(me[a.id]), q=mid(pv(p,a.id)); return {a,m,q,d:Math.abs(m-q)}; }).sort((x,y)=>x.d-y.d);
@@ -2240,35 +2247,41 @@ function iceCards(p){
   if(rows.length){ const r=rows[0], l1=labOf(r.m,r.a), l2=labOf(r.q,r.a);
     cards.push({t:'두 분은 이런 점이 비슷해요',h:axLbl(r.a),b:l1===l2?`둘 다 ‘${esc(l1)}’ 쪽에 가까워요`:`‘${esc(l1)}’과 ‘${esc(l2)}’ 사이에서 비슷한 자리에 있어요`}); }
   else if(shared.length) cards.push({t:'두 분은 이런 점이 비슷해요',h:'관심사',b:`둘 다 ${shared.map(esc).join(', ')}을(를) 좋아해요`});
-  else cards.push({t:'두 분은 이런 점이 비슷해요',h:'이제 알아가는 중',b:'아직 겹치는 정보가 적어요. 대화로 찾아봐요'});
+  else cards.push({t:'두 분은 이런 점이 비슷해요',h:'이제 알아가는 중',b:'아직 겹치는 정보가 적어요.<br>대화로 찾아봐요'});
   // 다른 점
   const dr=rows.length>1?rows[rows.length-1]:null;
   if(dr&&dr.d>.12) cards.push({t:'두 분은 이런 점이 달라서 흥미로워요',h:axLbl(dr.a),b:`나는 ‘${esc(labOf(dr.m,dr.a))}’, ${esc(p.name)}님은 ‘${esc(labOf(dr.q,dr.a))}’ 쪽이에요`});
-  else cards.push({t:'두 분은 이런 점이 달라서 흥미로워요',h:'닮은 듯 다른 둘',b:'크게 다른 점이 보이지 않아요. 작은 차이를 직접 찾아봐요'});
+  else cards.push({t:'두 분은 이런 점이 달라서 흥미로워요',h:'닮은 듯 다른 둘',b:'크게 다른 점이 보이지 않아요.<br>작은 차이를 직접 찾아봐요.'});
   // 관심사
   const tg=(p.tags||[]);
   cards.push({t:'상대방은 이런 관심사가 있어요',h:'',b:tg.length?`<span class="ice-tags">${tg.map(t=>`<span class="tg${shared.includes(t)?' sh':''}">${esc(t)}</span>`).join('')}</span>${shared.length?`<span class="ice-n2">겹치는 관심사 · ${shared.map(esc).join(', ')}</span>`:''}`:'아직 관심사를 적지 않았어요'});
   return cards;
 }
 function iceHTML(p){
-  const cs=iceCards(p), card=c=>`<div class="ice-c"><i class="ice-t">${c.t}</i>${c.h?`<b class="ice-h">${c.h}</b>`:''}<span class="ice-b">${c.b}</span></div>`;
-  const all=[cs[cs.length-1],...cs,cs[0]];
-  return `<div class="ice" id="ice"><div class="ice-vp"><div class="ice-tr" id="iceTr" style="transform:translateX(-${iceK*100}%)">${all.map(card).join('')}</div></div>
-    <button class="ice-nav prev" aria-label="이전 카드">‹</button><button class="ice-nav next" aria-label="다음 카드">›</button>
-    <div class="ice-dots">${cs.map((_,i)=>`<i class="${i===iceK-1?'on':''}"></i>`).join('')}</div></div>`;
+  const cs=iceCards(p), n=cs.length;
+  const card=(c,i)=>`<div class="ice-c" data-i="${i}" data-pos="${(i-iceFront+n)%n}"><i class="ice-t">${c.t}</i>${c.h?`<b class="ice-h">${c.h}</b>`:''}<span class="ice-b">${c.b}</span></div>`;
+  return `<div class="ice" id="ice" role="group" aria-label="대화 시작 카드: 누르면 다음 카드로 넘어가요"><div class="ice-st">${cs.map(card).join('')}</div><div class="ice-dots">${cs.map((_,i)=>`<i class="${i===iceFront?'on':''}"></i>`).join('')}</div></div>`;
 }
 function bindIce(){
   const root=$('#ice'); if(!root) return;
-  const tr=$('#iceTr'), n=3, dots=$$('.ice-dots i',root);
-  let busy=false;
-  const set=(k,anim)=>{ tr.style.transition=anim?'transform .36s var(--ease)':'none'; tr.style.transform=`translateX(-${k*100}%)`; iceK=k; dots.forEach((d,i)=>d.classList.toggle('on',i===((k-1+n)%n))); };
-  const go=d=>{ if(busy) return; busy=true; set(iceK+d,true);
-    setTimeout(()=>{ if(iceK===0) set(n,false); else if(iceK===n+1) set(1,false); busy=false; },380); };
-  $('.prev',root).onclick=()=>go(-1); $('.next',root).onclick=()=>go(1);
-  const vp=$('.ice-vp',root); let sx=null;
-  vp.addEventListener('pointerdown',e=>{ sx=e.clientX; });
-  vp.addEventListener('pointerup',e=>{ if(sx==null) return; const dx=e.clientX-sx; sx=null; if(dx<-36) go(1); else if(dx>36) go(-1); else go(1); });
-  vp.addEventListener('pointercancel',()=>{ sx=null; });
+  const cards=$$('.ice-c',root), dots=$$('.ice-dots i',root), n=cards.length;
+  let busy=false, sx=null;
+  const place=()=>{ cards.forEach(c=>{ c.dataset.pos=(+c.dataset.i-iceFront+n)%n; }); dots.forEach((d,i)=>d.classList.toggle('on',i===iceFront)); };
+  const flip=dir=>{
+    if(busy) return; busy=true;
+    const top=cards.find(c=>+c.dataset.pos===0);
+    top.style.setProperty('--fx',(dir<0?-1:1)*118+'%'); top.style.setProperty('--fr',(dir<0?-1:1)*9+'deg');
+    top.classList.add('fly');
+    iceFront=(iceFront+1)%n;
+    cards.forEach(c=>{ if(c!==top) c.dataset.pos=(+c.dataset.i-iceFront+n)%n; });      // 뒤에 있던 카드는 한 칸씩 앞으로
+    dots.forEach((d,i)=>d.classList.toggle('on',i===iceFront));
+    setTimeout(()=>{ top.classList.add('nt'); top.classList.remove('fly'); top.dataset.pos=n-1; void top.offsetWidth; top.classList.remove('nt'); busy=false; },300);   // 날아간 카드는 맨 뒤로
+  };
+  const st=$('.ice-st',root);
+  st.addEventListener('pointerdown',e=>{ sx=e.clientX; });
+  st.addEventListener('pointerup',e=>{ if(sx==null) return; const dx=e.clientX-sx; sx=null; flip(dx<-30?-1:1); });
+  st.addEventListener('pointercancel',()=>{ sx=null; });
+  place();
 }
 function renderMsgs(){
   const box=$('#msgs');
@@ -2323,7 +2336,7 @@ const CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.
 const ED={
   name:{label:'이름',type:'text',max:12,ph:'이름을 입력해 주세요',get:()=>my.name,set:v=>{v=v.trim();if(v) my.name=v}},
   bio:{label:'자기소개',type:'area',max:120,ph:'자기소개를 입력해 주세요',get:()=>my.bio,set:v=>{my.bio=v.trim()}},
-  age:{label:'나이',type:'num',min:1,get:()=>my.age,fmt:v=>`${v}세`,set:v=>{const n=parseInt(v,10);if(n>0) my.age=n}},
+  age:{label:'나이',type:'num',min:19,get:()=>my.age,fmt:v=>`${v}세`,set:v=>{const n=parseInt(v,10);if(n>=19) my.age=n}},
   height:{label:'키',type:'num',min:1,ph:'표시 안 함',get:()=>my.height,fmt:v=>`${v}cm`,set:v=>{ const n=parseInt(v,10); if(n>0) my.height=n; else if(String(v).trim()==='') my.height=null; }},
   job:{label:'직업',type:'text',max:20,ph:'표시 안 함',get:()=>my.job,set:v=>{my.job=v.trim()}}
 };
@@ -2483,7 +2496,7 @@ function openProfileEditor(id){
   const p=profiles[id]; let gsel=p.gender||'';
   openSheet(`<div class="grab"></div><h2>프로필 수정</h2>
     <div class="fld" style="margin-top:14px"><label for="eName">이름</label><input class="inp" id="eName" maxlength="12" value="${esc(p.name)}"></div>
-    <div class="fld"><label for="eAge">나이</label><input class="inp" id="eAge" type="number" inputmode="numeric" min="1" value="${p.age}"></div>
+    <div class="fld"><label for="eAge">나이</label><input class="inp" id="eAge" type="number" inputmode="numeric" min="19" value="${p.age}"></div>
     <div class="fld"><label>젠더</label><div id="ePron"></div></div>
     <div class="fld"><label for="eJob">직업</label><input class="inp" id="eJob" maxlength="20" value="${esc(p.job||'')}"></div>
     <div class="fld"><label for="eBio">자기소개</label><textarea class="ta" id="eBio" rows="3" maxlength="120">${esc(p.bio)}</textarea></div>
@@ -2497,7 +2510,7 @@ function openProfileEditor(id){
   };
   $('#eSave').onclick=()=>{
     const name=$('#eName').value.trim(), age=parseInt($('#eAge').value,10);
-    save({name:name||p.name,age:(age>0)?age:p.age,gender:gsel,job:$('#eJob').value.trim(),bio:$('#eBio').value.trim()});
+    save({name:name||p.name,age:(age>=19)?age:p.age,gender:gsel,job:$('#eJob').value.trim(),bio:$('#eBio').value.trim()});
   };
   $('#eReset').onclick=()=>save({...p.orig});
 }
@@ -2576,13 +2589,13 @@ const STEPS=[
     valid:()=>draft.name.trim().length>0},
   {title:'나이와 키를\n알려 주세요',sub:'나중에 언제든 바꿀 수 있어요.',
     render(c){
-      c.innerHTML=`<div class="fld"><label for="oAge">나이<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oAge" type="number" inputmode="numeric" min="1" placeholder="예: 27" value="${esc(draft.age)}"></div>
+      c.innerHTML=`<div class="fld"><label for="oAge">나이<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oAge" type="number" inputmode="numeric" min="19" placeholder="예: 27 (19세 이상)" value="${esc(draft.age)}"></div>
         <div class="fld"><label for="oH">키 (cm)<em class="req">선택</em></label><input class="inp big" id="oH" type="number" inputmode="numeric" min="1" placeholder="예: 168" value="${esc(draft.height)}"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
       const a=$('#oAge'), h=$('#oH');
       a.oninput=()=>{draft.age=a.value;updateOnbNext()};
       h.oninput=()=>{draft.height=h.value;updateOnbNext()};
     },
-    valid(){ const a=parseInt(draft.age,10), hv=String(draft.height).trim(), h=parseInt(hv,10); return a>0&&(hv===''||h>0); }},
+    valid(){ const a=parseInt(draft.age,10), hv=String(draft.height).trim(), h=parseInt(hv,10); return a>=19&&(hv===''||h>0); }},
   {title:'젠더를\n골라 주세요',sub:'나를 가장 잘 나타내는 걸 골라 보세요.',
     render(c){
       c.innerHTML='<div class="fld"><div id="oGender"></div></div>';
@@ -2656,7 +2669,7 @@ const STEPS=[
       paintDots();
       const draw=()=>{
         const X=draft.axes[0]?axisById(draft.axes[0]):null, Y=draft.axes[1]?axisById(draft.axes[1]):null;
-        const yl=Y?(Y.id==='dist'?[Y.b,Y.a]:[Y.a,Y.b]):['',''];
+        const yl=Y?(FLIP_Y.includes(Y.id)?[Y.b,Y.a]:[Y.a,Y.b]):['',''];
         $('#apY').innerHTML=`<span>${Y?yl[0]:''}</span><b>${Y?axLbl(Y):'세로축'}</b><span>${Y?yl[1]:''}</span>`;
         $('#apX').innerHTML=`<span>${X?X.a:''}</span><b>${X?axLbl(X):'가로축'}</b><span>${X?X.b:''}</span>`;
         $('#axChips').innerHTML=axes.map(a=>{ const i=draft.axes.indexOf(a.id), off=!has(a); return `<button class="axc${off?' off':''}" aria-pressed="${i>=0}" ${off?'aria-disabled="true"':''} data-id="${a.id}"><span>${axLbl(a)}</span><em>${off?'앞에서 표시 안 함으로 두었어요':`${a.a} ↔ ${a.b}`}</em>${i>=0?`<i class="axbd">${i===0?'가로':'세로'}</i>`:''}</button>`; }).join('');
@@ -2733,6 +2746,7 @@ const COACH=[
   {sel:'#stage',pad:0,r:'22px',center:true,text:'Splot에 오신 것을 환영합니다!\n만나고 싶은 사람들을 스펙트럼 위에서 살펴보세요.'},
   {sel:'.dot.t2',pad:8,r:'50%',text:'점 하나하나가 프로필이에요.\n한 번 누르면 간단히 보여 주고, 다시 누르면 얼굴 사진이 나와요.'},
   {sel:'#zone',pad:6,r:'20px',text:'내가 선호하는 쪽으로 영역을 옮기면 그에 맞는 사람들이 드러나요.'},
+  {sel:'#fltBtn',pad:6,r:'50%',text:'성적 지향과 젠더 표현은 여기서 필터로 걸러 볼 수 있어요.\n걸치지 않는 사람은 빈 원으로 나와요.'},
   {sel:'#prefBtn',pad:6,r:'50%',text:'여기서 모든 기준의 범위를 조정해요'},
   {sel:'.tabs',pad:0,r:'0px',text:'좋아요, 채팅, 프로필은 아래 탭에 있어요'}
 ];

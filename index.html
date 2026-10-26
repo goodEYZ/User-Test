@@ -49,8 +49,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 
 .top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
 .ttl{font-size:24px;font-weight:500;letter-spacing:-.02em}
-.brand{font-size:24px;font-weight:500;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.brand .logo{width:26px;height:26px;color:#3b3d3b}
+.brand{font-size:24px;font-weight:500;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;color:var(--zone)}
+.brand .logo{width:26px;height:26px;color:var(--zone)}
 .seg{display:flex;background:var(--field);border-radius:999px;padding:3px}
 .seg button{border:0;background:none;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;min-height:32px;white-space:nowrap}
 .seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 0 rgba(59,61,59,.16)}
@@ -74,7 +74,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .gl.v{left:50%;top:-100%;width:1px;height:300%}
 .gl.h{top:50%;left:-100%;height:1px;width:300%}
 
-.ticks{position:absolute;pointer-events:none}
+.ticks{position:absolute;pointer-events:none;z-index:8}
 .ticks.x{left:0;right:0;bottom:0;height:0;clip-path:inset(-40px 0 -40px 0)}
 .ticks.y{top:0;bottom:0;left:0;width:0;clip-path:inset(0 -40px 0 -40px)}
 .tk{position:absolute;display:block;background:rgba(59,61,59,.32)}
@@ -86,9 +86,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .ticks.x .tk b{top:9px;left:0;transform:translateX(-50%)}
 .ticks.y .tk b{left:10px;top:0;transform:translateY(-50%)}
 
-.ystrip{position:absolute;left:16px;top:var(--st);bottom:var(--sb);z-index:8;display:flex;flex-direction:column;align-items:center;min-height:0}
-.xstrip{position:absolute;left:var(--sl);right:var(--sr);bottom:14px;z-index:8;display:flex;align-items:center;gap:6px;min-width:0}
-.axline{flex:1;background:var(--line);display:block}
+.ystrip{position:absolute;left:16px;top:var(--st);bottom:var(--sb);display:flex;flex-direction:column;align-items:center;min-height:0}
+.xstrip{position:absolute;left:var(--sl);right:var(--sr);bottom:14px;display:flex;align-items:center;gap:6px;min-width:0}
+.axline{flex:1;background:rgba(59,61,59,.22);display:block;position:relative;z-index:8;mix-blend-mode:multiply}
+.ystrip>*:not(.axline),.xstrip>*:not(.axline){position:relative;z-index:8}
 .ystrip .axline{width:1px;margin:6px 0}
 .xstrip .axline{height:1px;margin:0 2px}
 .end{border:0;background:rgba(252,252,252,.9);box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;font-size:13px;font-weight:500;color:var(--ink);padding:6px 10px;min-height:32px;border-radius:999px;white-space:nowrap;max-width:38%;overflow:hidden;text-overflow:ellipsis}
@@ -117,11 +118,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .br.u::before{bottom:-3px;left:50%;margin-left:-3px}
 .br.d::before{top:-3px;left:50%;margin-left:-3px}
 
+.zone,.zh,.zc{transition:left .28s var(--spring),top .28s var(--spring),width .28s var(--spring),height .28s var(--spring)}
 /* 내가 찾는 범위 */
-.zone{position:absolute;border-radius:19px;pointer-events:none;
-  background:rgba(84,84,181,.22)}
+.zone{position:absolute;border-radius:19px;pointer-events:none;overflow:hidden;
+  background-color:rgba(84,84,181,.06);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .23 0 0 0 0 .24 0 0 0 0 .23 .6 0 0 0 -.19'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(46% 38% at 12% 8%,rgba(84,84,181,.38),rgba(84,84,181,0) 100%),radial-gradient(60% 46% at 96% 30%,rgba(255,188,21,.26),rgba(255,188,21,0) 100%),radial-gradient(70% 52% at 30% 98%,rgba(255,188,21,.34),rgba(255,188,21,0) 100%),radial-gradient(40% 32% at 92% 92%,rgba(84,84,181,.26),rgba(84,84,181,0) 100%),linear-gradient(158deg,rgba(84,84,181,.14) 0%,rgba(84,84,181,0) 38%,rgba(255,188,21,.12) 100%);
+  background-size:220px 220px,100% 100%,100% 100%,100% 100%,100% 100%,100% 100%}
 .zl{position:absolute;left:9px;top:9px;width:18px;height:18px;fill:none;stroke:var(--pzt);stroke-width:2;stroke-linecap:round;pointer-events:none;opacity:.35}
-.zh{position:absolute;transform:translate(-50%,-50%);border-radius:4px;background:var(--pz);border:0;padding:0;touch-action:none;z-index:7;box-shadow:0 1px 0 rgba(59,61,59,.25)}
+.zh{position:absolute;transform:translate(-50%,-50%);border-radius:4px;background:var(--ink);border:0;padding:0;touch-action:none;z-index:7;box-shadow:0 1px 0 rgba(59,61,59,.25)}
 .zh::after{content:"";position:absolute}
 .zh.n,.zh.s{width:30px;height:5px;cursor:ns-resize}
 .zh.e,.zh.w{width:5px;height:30px;cursor:ew-resize}
@@ -143,6 +147,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .dot.t2{z-index:3}
 .dot.t1{z-index:2}
 .dot.t1 .lyr.nf{opacity:.5;box-shadow:0 2px 0 rgba(59,61,59,.16)}
+.dot.fx,.eb.fx{display:none!important}
 .dot.t0{z-index:1;border-color:rgba(59,61,59,.09)}
 .dot.t0 .lyr{display:none}
 .dot.kept .lyr.nf{box-shadow:0 0 0 2px #3b3d3b,0 1px 0 rgba(59,61,59,.13)}
@@ -166,15 +171,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .snaptog svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
 .snaptog[aria-pressed="true"]{background:#3b3d3b;color:#fcfcfc}
 .metog{display:flex;align-items:center;gap:8px;background:rgba(252,252,252,.94);border-radius:999px;font-size:12px;font-weight:500;color:#3b3d3b;box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;padding:5px 6px 5px 12px}
-.metog input{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:11px;background:#cfcfcf;position:relative;margin:0;cursor:pointer;transition:background .2s}
-.metog input::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fcfcfc;transition:transform .2s}
+.metog input{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:12px;background:#cfcfcf;position:relative;margin:0;cursor:pointer;transition:background .2s}
+.metog input::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fcfcfc;transition:transform .2s}
 .metog input:checked{background:#3b3d3b}
-.metog input:checked::after{transform:translateX(16px)}
+.metog input:checked::after{transform:translateX(20px)}
 .fab-left{position:absolute;left:calc(var(--sl) + 6px);bottom:calc(var(--sb) + 8px);z-index:10;display:flex;gap:8px}
 .zr{width:42px;height:42px;border-radius:50%;border:0;background:rgba(252,252,252,.94);box-shadow:0 2px 0 rgba(59,61,59,.16);display:grid;place-items:center;cursor:pointer;padding:0;color:#3b3d3b}
 .zr svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .zr text{fill:currentColor;stroke:none;font-size:8.6px;font-weight:500;font-family:inherit}
-.recenter{background:rgba(252,252,252,.94);border-radius:999px;font-size:12px;font-weight:500;color:#3b3d3b;box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;border:0;padding:0 14px;min-height:32px}
+.recenter{display:none!important;background:rgba(252,252,252,.94);border-radius:999px;font-size:12px;font-weight:500;color:#3b3d3b;box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;border:0;padding:0 14px;min-height:32px}
 
 .listview{position:absolute;inset:0;z-index:2;padding:124px 16px 16px;background:var(--plane);overflow:auto}
 .ov-top{position:absolute;left:0;right:0;top:0;z-index:5;pointer-events:none;background:linear-gradient(var(--plane) 72%,rgba(244,244,244,0))}
@@ -196,7 +201,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .list-mode #unmarkChip,.list-mode .fabs{display:none}
 .fabs{display:flex;gap:8px}
 .fab{position:relative}
-.fab.on::after{content:"";position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#ffbc15;border:2px solid #fcfcfc}
+.fab.on::after{display:none}
+#fltBtn svg{stroke:#e2a200}
+#prefBtn svg{stroke:var(--zone)}
+#fltBtn.on{background:var(--key2)}
+#fltBtn.on svg{stroke:#3b3d3b}
 
 /* 처음 접속했을 때 뜨는 사용법 팝업 */
 .intro{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(59,61,59,.38)}
@@ -230,13 +239,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:.5px solid var(--line);background:var(--surface);padding:6px 4px 8px}
 .tab{position:relative;border:0;background:none;font-size:11.5px;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;min-height:50px;cursor:pointer;border-radius:12px}
 .tab svg{width:22px;height:22px;fill:currentColor;fill-opacity:0;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:fill-opacity .25s var(--ease),transform .2s var(--ease)}
-.tab[aria-selected="true"] svg{fill-opacity:1}
+.tab[aria-selected="true"] svg{fill-opacity:1;color:var(--zone)}
 .tab svg.logo-ic{stroke-width:2}
 .tab[aria-selected="true"]{color:var(--ink);font-weight:500}
 .tbadge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--ink);color:var(--ground);font-size:10px;font-weight:500;display:grid;place-items:center;padding:0 4px}
 
-.scrim{position:absolute;inset:0;background:rgba(59,61,59,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
-.sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;overflow:auto;overscroll-behavior:contain;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 20px 28px;transform:translateY(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:21}
+.scrim{position:absolute;inset:0;background:rgba(59,61,59,.42);opacity:0;pointer-events:none;transition:opacity .4s var(--ease);z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;overflow:auto;overscroll-behavior:contain;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 20px 28px;transform:translateY(102%);transition:transform .55s var(--ease);z-index:21}
 .phone.sheet-open .scrim{opacity:1;pointer-events:auto}
 .phone.sheet-open .sheet{transform:none}
 .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
@@ -302,6 +311,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 
 /* 슬라이더 (선호 범위 = 파란색, 내 위치 = 어두운색) */
 .trk{padding:12px 0 4px}
+.epulse{position:absolute;top:50%;width:150px;height:150px;margin-top:-75px;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(closest-side,rgba(84,84,181,.34),rgba(255,188,21,.16) 62%,rgba(255,188,21,0));transform:scale(.25);opacity:1;animation:epl .8s cubic-bezier(.1,.7,.2,1) forwards}
+.epulse.l{left:-75px}.epulse.r{right:-75px}
+.trk.flt .epulse{background:radial-gradient(closest-side,rgba(255,188,21,.5),rgba(255,188,21,.18) 62%,rgba(255,188,21,0))}
+@keyframes epl{to{transform:scale(1.35);opacity:0}}
 .trk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .trk-h b{font-size:14px}
 .mdesc{font-size:12.5px;font-weight:500;color:var(--ink2);text-align:right}
@@ -309,6 +322,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .mbar{position:absolute;top:3px;bottom:3px;border-radius:12px;cursor:grab;touch-action:none}
 .trk.pref .mbar{background:var(--pz)}
 .trk.self .mbar{background:var(--ink)}
+.trk.flt .mbar{background:var(--key2)}
 .mh{position:absolute;top:-4px;bottom:-4px;width:24px;cursor:ew-resize;touch-action:none}
 .mh.l{left:-12px}.mh.r{right:-12px}
 .mh::after{content:"";position:absolute;top:6px;width:20px;height:20px;border-radius:50%;background:#fcfcfc;box-shadow:0 1px 0 rgba(59,61,59,.2)}
@@ -365,10 +379,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .set-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:.5px solid var(--line)}
 .set-row b{font-size:14.5px;display:block}
 .set-row span{font-size:12.5px;color:var(--ink2);display:block;margin-top:2px;line-height:1.45}
-.switch{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:none;cursor:pointer;margin:0;transition:background .2s}
-.switch::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);transition:transform .2s}
+.switch{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:12px;background:var(--line);position:relative;flex:none;cursor:pointer;margin:0;transition:background .2s}
+.switch::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:transform .2s}
 .switch:checked{background:var(--zone)}
-.switch:checked::after{transform:translateX(18px)}
+.switch:checked::after{transform:translateX(20px)}
 .set-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;border-bottom:.5px solid var(--line);background:none;padding:15px 0;font-size:14.5px;cursor:pointer}
 .set-btn em{font-style:normal;color:var(--ink2);font-size:13px}
 
@@ -423,7 +437,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .toast{position:absolute;left:50%;bottom:84px;transform:translate(-50%,12px);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;white-space:nowrap;max-width:94%;display:flex;align-items:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .toast.on.act{pointer-events:auto}
-.push{position:absolute;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:95;display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:20px;background:rgba(59,61,59,.96);color:#fcfcfc;box-shadow:0 3px 0 rgba(59,61,59,.2);cursor:pointer;transform:translateY(-140%);opacity:0;transition:transform .32s cubic-bezier(.2,.9,.25,1.05),opacity .25s}
+.push{position:absolute;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:95;display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:20px;background:rgba(59,61,59,.96);color:#fcfcfc;box-shadow:0 3px 0 rgba(59,61,59,.2);cursor:pointer;transform:translateY(-140%);opacity:0;transition:transform .6s var(--ease),opacity .35s}
 .push.on{transform:none;opacity:1}
 .push .pv-av .avatar{width:42px;height:42px;font-size:18px;flex:none}
 .push .pv-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
@@ -558,8 +572,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 @keyframes dropIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 .coach{position:absolute;inset:0;z-index:60;transition:opacity .3s var(--ease)}
 .coach.out{opacity:0;pointer-events:none}
-.spot{position:absolute;box-shadow:0 0 0 9999px rgba(59,61,59,.66);pointer-events:none;transition:left .45s var(--ease),top .45s var(--ease),width .45s var(--ease),height .45s var(--ease),border-radius .45s var(--ease)}
-.tip{position:absolute;background:#fcfcfc;border-radius:18px;padding:15px 14px 10px 17px;box-shadow:0 3px 0 rgba(59,61,59,.2);color:#3b3d3b;transition:left .45s var(--ease),top .45s var(--ease),opacity .17s ease,transform .17s ease}
+.spot{position:absolute;box-shadow:0 0 0 9999px rgba(59,61,59,.66);pointer-events:none;transition:left .62s var(--ease),top .62s var(--ease),width .62s var(--ease),height .62s var(--ease),border-radius .62s var(--ease)}
+.tip{position:absolute;background:#fcfcfc;border-radius:18px;padding:15px 14px 10px 17px;box-shadow:0 3px 0 rgba(59,61,59,.2);color:#3b3d3b;transition:left .62s var(--ease),top .62s var(--ease),opacity .25s ease,transform .25s ease}
 .tip.hide{opacity:0;transform:translateY(5px)}
 .tip-t{font-size:15px;font-weight:500;line-height:1.5;white-space:pre-line}
 .tip-f{display:flex;align-items:center;gap:8px;margin-top:11px}
@@ -570,30 +584,30 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .tip-next{border:0;background:#3b3d3b;color:#fcfcfc;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer}
 
 /* ---------- 부드러운 전환 ---------- */
-:root{--ease:cubic-bezier(.2,.8,.2,1)}
+:root{--ease:cubic-bezier(.16,1,.3,1);--spring:cubic-bezier(.2,.9,.25,1.12)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes liftIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes pageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
-@keyframes stepIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes stepInBack{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+@keyframes liftIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pageIn{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+@keyframes stepIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes stepInBack{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
 @keyframes popIn{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes wfade{from{opacity:.35}to{opacity:1}}
-.screen.on{animation:fadeIn .28s var(--ease) both}
-#s-likes.on,#s-chat.on,#s-profile.on{animation:liftIn .32s var(--ease) both}
-#fieldLayer:not([hidden]),#listview:not([hidden]){animation:fadeIn .26s var(--ease) both}
-.page:not([hidden]){animation:pageIn .32s var(--ease) both}
-.page.out{opacity:0;transform:translateX(12px);transition:opacity .2s var(--ease),transform .2s var(--ease);animation:none}
-.onb-body>*{animation:stepIn .36s var(--ease) both}
+.screen.on{animation:fadeIn .5s var(--ease) both}
+#s-likes.on,#s-chat.on,#s-profile.on{animation:liftIn .62s var(--ease) both}
+#fieldLayer:not([hidden]),#listview:not([hidden]){animation:fadeIn .45s var(--ease) both}
+.page:not([hidden]){animation:pageIn .6s var(--ease) both}
+.page.out{opacity:0;transform:translateX(12px);transition:opacity .3s var(--ease),transform .3s var(--ease);animation:none}
+.onb-body>*{animation:stepIn .6s var(--ease) both}
 .onb-body>#onbC{animation-delay:.05s}
 .onb-body[data-dir="back"]>*{animation-name:stepInBack}
-.intro:not([hidden]){animation:fadeIn .22s var(--ease) both}
-.intro:not([hidden]) .intro-card{animation:popIn .3s var(--ease) both}
-#world.wf{animation:wfade .32s var(--ease)}
-.si{animation:liftIn .3s var(--ease) both}
+.intro:not([hidden]){animation:fadeIn .4s var(--ease) both}
+.intro:not([hidden]) .intro-card{animation:popIn .55s var(--ease) both}
+#world.wf{animation:wfade .5s var(--ease)}
+.si{animation:liftIn .55s var(--ease) both}
 .snapgrid{position:absolute;left:-100%;top:-100%;width:300%;height:300%;pointer-events:none;opacity:0;transition:opacity .22s var(--ease);
   background-image:linear-gradient(to right,rgba(59,61,59,.045) 1px,transparent 1px),linear-gradient(to bottom,rgba(59,61,59,.045) 1px,transparent 1px)}
 .snapgrid.on{opacity:1}
-.chip,.btn,.opt,.seg button,.tab,.row,.set-btn,.help,.fab,.snaptog,.zr,.recenter,.ed-b,.setbtn,.end,.apill,.swap,.offck input,.mbar{transition:background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease),transform .16s var(--ease),opacity .2s var(--ease)}
+.chip,.btn,.opt,.seg button,.tab,.row,.set-btn,.help,.fab,.snaptog,.zr,.recenter,.ed-b,.setbtn,.end,.apill,.swap,.offck input,.mbar{transition:left .26s var(--spring),width .26s var(--spring),background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease),transform .16s var(--ease),opacity .2s var(--ease)}
 .chip:active,.btn:active,.opt:active,.row:active,.set-btn:active,.help:active,.fab:active,.snaptog:active,.seg button:active,.setbtn:active{transform:scale(.97)}
 .tab:active svg{transform:scale(.88)}
 
@@ -611,14 +625,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .avatar .init{width:100%;height:100%;display:grid;place-items:center;font-weight:500;color:rgba(59,61,59,.58);font-size:.9em;background:#fcfcfc}
 .dot .lyr .init{width:100%;height:100%;display:grid;place-items:center;font-weight:500;color:rgba(59,61,59,.58);background:#fcfcfc}
 #peekLayer{position:absolute;inset:0;z-index:6;pointer-events:none}
-.pbub{position:absolute;background:#fcfcfc;border-radius:16px;padding:10px 13px 11px;box-shadow:0 2px 0 rgba(59,61,59,.13);pointer-events:auto;animation:popIn .22s var(--ease) both}
+.pbub{position:absolute;background:#fcfcfc;border-radius:16px;padding:10px 13px 11px;box-shadow:0 2px 0 rgba(59,61,59,.13);pointer-events:auto;animation:popIn .4s var(--ease) both}
 .pbub .l1{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;font-size:14.5px}
 .pbub .l1 b{font-weight:500}
 .pbub .l1 em{font-style:normal;font-size:12px;font-weight:500;color:var(--ink2)}
 .pbub .l2{margin-top:4px;font-size:12.5px;line-height:1.45;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .pbub .tail{position:absolute;bottom:-6px;width:14px;height:14px;background:#fcfcfc;transform:translateX(-50%) rotate(45deg);border-radius:3px}
 .pbub.below .tail{bottom:auto;top:-6px}
-.pmore{position:absolute;border:0;background:var(--ink);color:#fcfcfc;border-radius:999px;font-size:13.5px;font-weight:500;padding:10px 18px;box-shadow:0 2px 0 rgba(59,61,59,.2);pointer-events:auto;cursor:pointer;white-space:nowrap;animation:popIn .22s var(--ease) both}
+.pmore{position:absolute;border:0;background:var(--ink);color:#fcfcfc;border-radius:999px;font-size:13.5px;font-weight:500;padding:10px 18px;box-shadow:0 2px 0 rgba(59,61,59,.2);pointer-events:auto;cursor:pointer;white-space:nowrap;animation:popIn .4s var(--ease) both}
 .pmore:active{transform:scale(.96)}
 .basis-line{margin:0 0 10px;font-size:12px;color:var(--ink2);opacity:.85}
 .grab{position:relative;touch-action:none}
@@ -668,9 +682,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .ap-y b .axi{margin:0 0 .3em;vertical-align:baseline}
 .ap-y b,.ap-x b{font-size:12.5px;color:var(--ink)}
 .ap-box{position:relative;aspect-ratio:1/1;background:var(--surface);border:1px solid transparent;border-radius:16px;overflow:hidden;box-shadow:0 2px 0 rgba(59,61,59,.10)}
-.ap-zone{position:absolute;left:24%;top:28%;width:44%;height:40%;border-radius:12px;background:rgba(84,84,181,.22)}
+.ap-zone{position:absolute;left:24%;top:28%;width:44%;height:40%;border-radius:12px;background:linear-gradient(135deg,rgba(84,84,181,.26),rgba(255,188,21,.24))}
 .ap-dot{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--ink);opacity:.22;box-sizing:border-box;border:1.5px solid transparent;transition:transform .28s var(--ease),opacity .28s,background-color .28s,border-color .28s}
-.ap-dot.off,.ap-dot.demo-off{background:transparent;border-color:rgba(59,61,59,.34);opacity:.7;transform:scale(.82)}
+.ap-dot.off,.ap-dot.demo-off{opacity:0;transform:scale(.5)}
 .flt-lab{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--ink2)}
 .flt-lab em{font-style:normal;font-weight:500;font-size:11.5px;opacity:.8;margin-left:4px}
 .fboxes{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
@@ -863,7 +877,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       <h2 id="introT">이렇게 써요</h2>
       <ul>
         <li>파란 상자가 내가 찾는 범위예요. 네 모서리는 두 변을, 변 가운데 손잡이는 한 변을 당겨 크기를 바꿔요.</li>
-        <li>상대의 중심이 상자 안이면 진하게, 범위만 겹치면 흐리게, 겹치지 않으면 빈 원으로 보여요.</li>
+        <li>상대의 중심이 상자 안이면 진하게, 범위만 겹치면 흐리게, 겹치지 않으면 빈 원으로 보여요. 필터로 걸러진 사람은 아예 보이지 않아요.</li>
         <li>프로필을 한 번 누르면 간단히 보이고, 다시 누르면 얼굴 사진이 나와요. 바깥을 누르면 접혀요.</li>
         <li>빈 곳을 끌면 화면이 움직여요.</li>
         <li>프로필을 끝까지 읽고 위로 세게 밀면 마음에 들어요가 전송돼요.</li>
@@ -958,21 +972,22 @@ const PAD=.05, KEEP=.18, MOVER=.12;
 const EPS=1e-4;
 
 /* ---------- 축 ---------- */
-const GROUPS=['위치와 신체','표현과 관계 방식','가치관과 끌림'];
+const GROUPS=['위치와 신체','젠더와 지향','관계 방식','가치관과 선호'];
 const axes=[
   {id:'dist',name:'거리',a:'가까이',b:'멀리',note:'사는 곳에서 0~300km',kind:'dist',group:0},
   {id:'age',name:'나이',a:'연하',b:'연상',note:'나와의 나이 차이 (±15살)',kind:'age',group:0},
   {id:'height',name:'키',a:'나보다 작은',b:'나보다 큰',note:'나와의 키 차이 (±40cm)',kind:'height',group:0},
-  {id:'gender',name:'젠더 표현',a:'마스큘린',b:'페미닌',note:'정체성이 아니라, 겉으로 드러나는 분위기예요',group:1},
-  {id:'orient',name:'성적 지향',a:'동성애',b:'이성애',note:'끌리는 사람의 젠더가 나와 같은지 다른지',group:1},
-  {id:'lead',name:'리드 성향',a:'이끄는 편',b:'맞추는 편',note:'데이트에서 자연스럽게 맡는 역할',group:1},
-  {id:'indep',name:'독립성',a:'독립적인',b:'의지하는',note:'관계 안에서 기대는 정도',group:1},
-  {id:'pace',name:'관계 속도',a:'천천히',b:'빠르게',note:'가까워지는 속도',group:1},
-  {id:'energy',name:'에너지',a:'집에서',b:'밖에서',note:'쉬는 날 보내는 방식',group:1},
-  {id:'politics',name:'정치 성향',a:'진보',b:'보수',note:'가치관이 얼마나 비슷했으면 하는지',group:2},
-  {id:'sex',name:'성적 끌림',a:'유성애',b:'무성애',note:'성적인 끌림을 느끼는 정도',group:2}
+  {id:'gender',name:'젠더 표현',a:'마스큘린',b:'페미닌',note:'정체성이 아니라, 겉으로 드러나는 분위기예요',group:1,flt:true},
+  {id:'orient',name:'성적 지향',a:'동성애',b:'이성애',note:'끌리는 사람의 젠더가 나와 같은지 다른지',group:1,flt:true},
+  {id:'lead',name:'리드 성향',a:'이끄는 편',b:'맞추는 편',note:'데이트에서 자연스럽게 맡는 역할',group:2},
+  {id:'indep',name:'독립성',a:'독립적인',b:'의지하는',note:'관계 안에서 기대는 정도',group:2},
+  {id:'pace',name:'관계 속도',a:'천천히',b:'빠르게',note:'가까워지는 속도',group:2},
+  {id:'energy',name:'에너지',a:'집에서',b:'밖에서',note:'쉬는 날 보내는 방식',group:2},
+  {id:'politics',name:'정치 성향',a:'진보',b:'보수',note:'가치관이 얼마나 비슷했으면 하는지',group:3},
+  {id:'sex',name:'성적 끌림',a:'유성애',b:'무성애',note:'성적인 끌림을 느끼는 정도',group:3}
 ];
 const axisById=id=>axes.find(a=>a.id===id);
+const axSel=axes.filter(a=>!a.flt);          // 탐색 화면의 축으로 고를 수 있는 기준 (젠더 표현·성적 지향은 필터로만 써요)
 /* 축 아이콘: 글씨 색을 따라가는 단색 선 아이콘 */
 const AX_ICON={
   dist:'<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
@@ -1076,7 +1091,7 @@ axes.forEach(a=>ensurePref(a.id));
 function applyDemoDefaults(){
   Object.assign(my,{name:'하루',age:26,height:168,bio:'새로운 동네 카페를 찾아다니는 중이에요. 말수는 적지만 대화는 좋아해요.',gender:'논바이너리',job:'디자이너',tags:['카페','전시','사진'],loc:true});
   Object.keys(meDefaults).forEach(k=>{me[k]={lo:meDefaults[k][0],hi:meDefaults[k][1]}});
-  pref.gender={lo:.3,hi:.65}; pref.lead={lo:.3,hi:.65};
+  pref.age={lo:.35,hi:.65}; pref.lead={lo:.3,hi:.65};
 }
 applyDemoDefaults();
 const zx=()=>ensurePref(state.x), zy=()=>ensurePref(state.y);
@@ -1094,7 +1109,7 @@ let zoom=1;
 const vw=()=>VIEW/zoom;
 const getOff=id=>{ if(view[id]==null) view[id]=.5-vw()/2; return view[id]; };
 
-const state={x:'gender',y:'lead',view:'field',ranges:false,showMe:true,snap:true,selected:null,tab:'explore',likeSeg:'in',likeSort:'recent'};
+const state={x:'age',y:'lead',view:'field',ranges:false,showMe:true,snap:true,selected:null,tab:'explore',likeSeg:'in',likeSort:'recent'};
 let enterIds=new Set();
 let shown=[];
 let dragging=false;
@@ -1490,7 +1505,7 @@ function tierFor(p,xid,yid,X,Y){
   if(overlap(A,X)&&overlap(B,Y)) return 1;
   return 0;
 }
-/* 필터: 성적 지향·젠더 표현 범위에 조금도 걸치지 않는 사람은 선호 영역 안에 있어도 항상 빈 원이에요 (값을 표시 안 한 사람은 그대로 둬요) */
+/* 필터: 성적 지향·젠더 표현 범위에 조금도 걸치지 않는 사람은 선호 영역 안에 있어도 항상 보이지 않아요 (값을 표시 안 한 사람은 그대로 둬요) */
 const fltActive=()=>FLT_IDS.some(id=>{ const f=fltOf(id); return f.lo>.0001||f.hi<.9999; });
 function passFilter(p){
   return FLT_IDS.every(id=>{ const f=fltOf(id); if(f.lo<=.0001&&f.hi>=.9999) return true; const A=pv(p,id); return !A||overlap(A,f); });
@@ -1611,7 +1626,7 @@ function buildField(){
   const z=document.createElement('div');
   z.className='zone'; z.id='zone'; z.tabIndex=0; z.setAttribute('role','group');
   z.setAttribute('aria-label','내가 찾는 범위. 플러스와 마이너스로 크기 조절');
-  z.innerHTML='<svg class="zl" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>';
+  z.innerHTML='';
   world.append(z);
 
   plotted.forEach(p=>{
@@ -1680,6 +1695,8 @@ function refresh(){
   shown.forEach(p=>{
     const t=tier(p); p.t=t;
     if(t===2) c2++; else if(t===1) c1++;
+    const fx=!passFilter(p);
+    if(p.el) p.el.classList.toggle('fx',fx); if(p.eb) p.eb.classList.toggle('fx',fx);
     if(p.el){p.el.classList.toggle('t2',t===2);p.el.classList.toggle('t1',t===1);p.el.classList.toggle('t0',t===0)}
     if(p.eb){p.eb.classList.toggle('t2',t===2);p.eb.classList.toggle('t1',t===1);p.eb.classList.toggle('t0',t===0)}
   });
@@ -1698,6 +1715,7 @@ function syncRecs(){
 }
 let keyT;
 // 상자 전체를 옮기는 기능은 없어요. 모서리를 당기면 맞닿은 두 변이, 변 가운데 손잡이를 당기면 그 한 변이 움직여요
+let zEdge=false;
 function bindZone(){
   const z=$('#zone'), stage=$('#stage');
   $$('#world .zh, #world .zc').forEach(h=>{
@@ -1717,9 +1735,10 @@ function bindZone(){
       if(c.includes('s')) Yf.hi=r4(clamp(sn(hs.yr.hi+dv,state.y),hs.yr.lo+my_,1));
       if(c.includes('n')) Yf.lo=r4(clamp(sn(hs.yr.lo+dv,state.y),0,hs.yr.hi-my_));
       if(flipY()){ Y.lo=r4(1-Yf.hi); Y.hi=r4(1-Yf.lo); } else { Y.lo=Yf.lo; Y.hi=Yf.hi; }
+      const atE=(X.lo<=.0001||X.hi>=.9999||Y.lo<=.0001||Y.hi>=.9999); if(atE&&!zEdge) buzz(10); zEdge=atE;
       placeZone(); refresh();
     });
-    const up=()=>{ if(!hs) return; hs=null; dragging=false; noClickUntil=performance.now()+400; const g=$('#snapGrid'); if(g) g.classList.remove('on'); settle(); syncRecs(); };
+    const up=()=>{ if(!hs) return; hs=null; dragging=false; zEdge=false; noClickUntil=performance.now()+400; const g=$('#snapGrid'); if(g) g.classList.remove('on'); settle(); syncRecs(); };
     h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
   });
 
@@ -2058,8 +2077,10 @@ function updateBadges(){
 /* ---------- 축 선택 ---------- */
 const SETBTN='<span class="setbtn">설정<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 8.5l5-5M4 3.5h4.5V8"/></svg></span>';
 function ensureAxesUsable(){
-  const order=['gender','orient','lead','indep','pace','energy','age','height','dist','politics','sex'];
-  if(!isSet(state.x)) state.x=order.find(id=>isSet(id)&&id!==state.y)||'gender';
+  const order=['age','lead','indep','pace','energy','height','dist','politics','sex'];
+  if(axisById(state.x)&&axisById(state.x).flt) state.x='age';
+  if(axisById(state.y)&&axisById(state.y).flt) state.y='lead';
+  if(!isSet(state.x)) state.x=order.find(id=>isSet(id)&&id!==state.y)||'age';
   if(!isSet(state.y)) state.y=order.find(id=>isSet(id)&&id!==state.x)||'lead';
 }
 // 내 정보를 설정해야 쓸 수 있는 축: 프로필 탭의 해당 항목으로 바로 이동해요
@@ -2080,7 +2101,7 @@ function goSetAxis(id){
 function openAxisPicker(which){
   const cur=state[which];
   const title=which==='x'?'가로축 고르기':'세로축 고르기';
-  const opts=GROUPS.map((g,gi)=>`<div class="grp">${g}</div>`+axes.filter(a=>a.group===gi).map(a=>{
+  const opts=GROUPS.map((g,gi)=>!axSel.some(a=>a.group===gi)?'':`<div class="grp">${g}</div>`+axSel.filter(a=>a.group===gi).map(a=>{
     const lock=!isSet(a.id);
     return `<button class="opt${lock?' locked':''}" role="radio" aria-checked="${a.id===cur}" data-id="${a.id}">
       <div><b>${a.a} ↔ ${a.b}</b><span>${axLbl(a)}</span></div>
@@ -2106,7 +2127,7 @@ const UNSET_BAR={lo:.35,hi:.65};
 const draftMemo={}, meMemo={};      // 마지막으로 정했던 범위: '표시 안 함'으로 바꿔도 같은 자리에 빈 슬라이더로 남아요
 function trackBlock(ax,mode){
   const own=mode!=='pref'&&mode!=='flt', req=own&&REQUIRED.includes(ax.id), optional=own&&!req;
-  return `<section class="trk ${own?'self':'pref'}" data-ax="${ax.id}">
+  return `<section class="trk ${own?'self':'pref'}${mode==='flt'?' flt':''}" data-ax="${ax.id}">
     <div class="trk-h"><b>${axLbl(ax)}${req?'<span class="star" title="필수" aria-label="필수">*</span>':''}</b><span class="rt"><span class="mdesc"></span>${optional?'<label class="offck"><input type="checkbox" aria-label="표시 안 함"><span>표시 안 함</span></label>':''}</span></div>
     <div class="mtrack"><div class="mbar"><div class="mh l"></div><div class="mh r"></div><span class="na" aria-hidden="true"><svg viewBox="0 0 40 14"><path d="M3 7h34M9 2L3 7l6 5M31 2l6 5-6 5"/></svg></span></div></div>
     ${tickRow(ax)}
@@ -2114,6 +2135,7 @@ function trackBlock(ax,mode){
   </section>`;
 }
 // mode: 'pref'(내가 찾는 범위) | 'self'(내 위치) | 'draft'(온보딩 중인 내 위치). 내 위치는 값이 없을 수 있어요(표시 안 함)
+const buzz=ms=>{ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
 function bindTrack(block,ax,mode,onChange){
   const tr=$('.mtrack',block), bar=$('.mbar',block), hl=$('.mh.l',block), hr=$('.mh.r',block), desc=$('.mdesc',block), ck=$('.offck input',block);
   const own=mode!=='pref'&&mode!=='flt', store=mode==='draft'?draftMe:me, memo=mode==='draft'?draftMemo:meMemo;
@@ -2124,22 +2146,26 @@ function bindTrack(block,ax,mode,onChange){
   const notify=()=>{ if(onChange) onChange(); };
   const ensure=()=>{ if(own&&!store[ax.id]) store[ax.id]={...ref()}; return get(); };
   if(own&&REQUIRED.includes(ax.id)) ensure();
+  const barPos=v=>{ bar.style.left='calc(3px + (100% - 6px) * '+v.lo+')'; bar.style.width='calc((100% - 6px) * '+(v.hi-v.lo)+')'; };
   const paint=()=>{
     const r=get();
-    if(!own){ bar.style.left=r.lo*100+'%'; bar.style.width=(r.hi-r.lo)*100+'%'; desc.textContent=describePref(ax,r); return; }
+    if(!own){ barPos(r); desc.textContent=describePref(ax,r); return; }
     if(r) memo[ax.id]={lo:r.lo,hi:r.hi};
     const v=r||ref();
     bar.classList.toggle('unset',!r);
-    bar.style.left=v.lo*100+'%'; bar.style.width=(v.hi-v.lo)*100+'%';
+    barPos(v);
     desc.textContent=r?describeSelf(r,ax):'';
     if(ck) ck.checked=!r;
   };
+  let lastEdge=null;
+  const edgePulse=side=>{ buzz(12); const p=document.createElement('i'); p.className='epulse '+side; tr.appendChild(p); setTimeout(()=>p.remove(),900); };
   const drag=(el,kind)=>{
     let st=null;
     el.addEventListener('pointerdown',e=>{
       e.stopPropagation(); e.preventDefault();
       const was=get(), r=ensure(); st={x:e.clientX,lo:r.lo,hi:r.hi};
       el.setPointerCapture(e.pointerId);
+      lastEdge=(r.lo<=.0001&&r.hi>=.9999)?null:(r.lo<=.0001?'l':(r.hi>=.9999?'r':null));
       if(!was){ paint(); notify(); }
     });
     el.addEventListener('pointermove',e=>{
@@ -2148,6 +2174,9 @@ function bindTrack(block,ax,mode,onChange){
       if(kind==='move'){const w=st.hi-st.lo;const lo=clamp(q(st.lo+dx),0,1-w);r.lo=r4(lo);r.hi=r4(lo+w)}
       else if(kind==='l'){r.lo=r4(clamp(q(st.lo+dx),0,st.hi-MINW()))}
       else{r.hi=r4(clamp(q(st.hi+dx),st.lo+MINW(),1))}
+      const edge=r.lo<=.0001?'l':(r.hi>=.9999?'r':null);
+      if(edge&&edge!==lastEdge&&!(r.lo<=.0001&&r.hi>=.9999&&kind==='move')) edgePulse(edge);
+      lastEdge=edge;
       paint(); notify();
     });
     const up=()=>{st=null}; el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
@@ -2168,7 +2197,7 @@ const fltSum=id=>{ const f=fltOf(id); return (f.lo<=.0001&&f.hi>=.9999)?'제한 
 function updateFltDot(){ const b=$('#fltBtn'); if(b) b.classList.toggle('on',fltActive()); }
 function openFilter(){
   closePeek();
-  openSheet(`<div class="grab"></div><h2>필터</h2><p class="sub">고른 범위에 조금이라도 걸치는 사람만 보여요. 걸치지 않으면 선호 영역 안에 있어도 빈 원으로 나와요.</p>${FLT_IDS.map(id=>trackBlock(axisById(id),'flt')).join('')}<div class="acts"><button class="btn" id="fltReset">초기화</button><button class="btn primary" id="fltOk">완료</button></div>`);
+  openSheet(`<div class="grab"></div><h2>필터</h2><p class="sub">고른 범위에 조금이라도 걸치는 사람만 보여요. 걸치지 않는 사람은 선호 영역 안에 있어도 보이지 않아요.</p>${FLT_IDS.map(id=>trackBlock(axisById(id),'flt')).join('')}<div class="acts"><button class="btn" id="fltReset">초기화</button><button class="btn primary" id="fltOk">완료</button></div>`);
   $$('#sheet .trk').forEach(b=>bindTrack(b,axisById(b.dataset.ax),'flt',()=>{ refresh(); updateFltDot(); }));
   $('#fltReset').onclick=()=>{ FLT_IDS.forEach(id=>{ flt[id]={lo:0,hi:1}; }); openFilter(); refresh(); updateFltDot(); };
   $('#fltOk').onclick=closeSheet;
@@ -2176,7 +2205,7 @@ function openFilter(){
 /* ---------- 선호 범위 페이지 ---------- */
 function openPref(){
   closePeek();
-  const act=[state.x,state.y].map(axisById), rest=axes.filter(a=>!act.includes(a));
+  const act=[state.x,state.y].map(axisById), rest=axSel.filter(a=>!act.includes(a));
   $('#prefBody').innerHTML=`<div class="grp first">지금 보고 있는 기준</div><div class="act-box">${act.map(a=>trackBlock(a,'pref')).join('')}</div>`
     +`<div class="grp split">다른 기준</div>`+GROUPS.map((g,gi)=>{ const li=rest.filter(a=>a.group===gi); return li.length?`<div class="grp sub">${g}</div>`+li.map(a=>trackBlock(a,'pref')).join(''):''; }).join('')
     +`<button class="reset" id="prefReset">초기화</button><p class="autosave">모든 내용은 자동 저장 됩니다.</p>`;
@@ -2663,9 +2692,9 @@ const STEPS=[
       onbPhotoUpdate();
     },
     valid:()=>true, label:()=>(photos.me||photos.meNF)?'다음':'건너뛰기'},
-  sliderStep(['gender','orient'],'표현과 지향을\n알려 주세요','겉으로 드러나는 분위기와, 끌리는 사람의 방향을 나와 가까운 곳에 놓아 보세요. 밝히고 싶지 않은 건 "표시 안 함"으로 두어도 괜찮아요.',REQUIRED),
+  sliderStep(['gender','orient'],'젠더와 지향을\n알려 주세요','겉으로 드러나는 분위기와, 끌리는 사람의 방향을 나와 가까운 곳에 놓아 보세요. 밝히고 싶지 않은 건 "표시 안 함"으로 두어도 괜찮아요.',REQUIRED),
   sliderStep(['lead','indep','pace','energy'],'관계 방식을\n알려 주세요','연애할 때의 나는 어떤 편인가요? 정답은 없어요. 나와 가까운 곳에 편하게 놓아 보세요.',[]),
-  sliderStep(['politics','sex'],'가치관과 끌림을\n알려 주세요','밝히고 싶지 않은 건 "표시 안 함"으로 두어도 괜찮아요.',[]),
+  sliderStep(['politics','sex'],'가치관과 선호를\n알려 주세요','밝히고 싶지 않은 건 "표시 안 함"으로 두어도 괜찮아요.',[]),
   {title:'위치를\n알려 주세요',sub:'가까운 사람을 찾을 때만 쓰여요.',
     render(c){
       c.innerHTML=`<div class="loc-ic">${PIN}</div><div class="loc-btns"><button class="btn" id="oLocY" aria-pressed="${draft.loc===true}">현재 위치 사용</button><button class="btn" id="oLocN" aria-pressed="${draft.loc===false}">사용 안 함</button></div>`;
@@ -2679,7 +2708,7 @@ const STEPS=[
       const has=a=>a.kind==='dist'?draft.loc===true:(a.kind==='height'?(hh>0):(a.kind==='age'?true:!!draftMe[a.id]));
       const avail=axes.filter(has);
       draft.axes=draft.axes.filter(id=>avail.some(a=>a.id===id));
-      // 예시 그래프의 점: 점마다 젠더 표현·성적 지향 범위가 달라서, 필터를 움직이면 일부가 빈 원이 돼요
+      // 예시 그래프의 점: 점마다 젠더 표현·성적 지향 범위가 달라서, 필터를 움직이면 일부가 사라져요
       const DOTS=[[14,22,[.05,.2],[.6,.9]],[30,60,[.25,.45],[.1,.3]],[44,34,[.4,.6],[.45,.7]],[58,70,[.55,.75],[.8,1]],[70,26,[.7,.9],[.2,.4]],[82,52,[.8,1],[.55,.8]],[24,82,[.15,.35],[.35,.55]],[66,86,[.45,.65],[.0,.2]]];
       const fbox=id=>{ const ax=axisById(id); return `<div class="fbox" data-ax="${id}"><button type="button" class="fbox-h" aria-expanded="false"><span class="fn">${axLbl(ax)}</span><span class="fs">${fltSum(id)}</span><svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></button><div class="fbox-w"><div class="fbox-b"><div>${trackBlock(ax,'flt')}</div></div></div></div>`; };
       c.innerHTML=`<p class="flt-lab">보고 싶은 범위만 걸러 볼 수도 있어요 <em>선택</em></p>
@@ -2707,7 +2736,7 @@ const STEPS=[
         const yl=Y?(FLIP_Y.includes(Y.id)?[Y.b,Y.a]:[Y.a,Y.b]):['',''];
         $('#apY').innerHTML=`<span>${Y?yl[0]:''}</span><b>${Y?axLbl(Y):'세로축'}</b><span>${Y?yl[1]:''}</span>`;
         $('#apX').innerHTML=`<span>${X?X.a:''}</span><b>${X?axLbl(X):'가로축'}</b><span>${X?X.b:''}</span>`;
-        $('#axChips').innerHTML=axes.map(a=>{ const i=draft.axes.indexOf(a.id), off=!has(a); return `<button class="axc${off?' off':''}" aria-pressed="${i>=0}" ${off?'aria-disabled="true"':''} data-id="${a.id}"><span>${axLbl(a)}</span><em>${off?'앞에서 표시 안 함으로 두었어요':`${a.a} ↔ ${a.b}`}</em>${i>=0?`<i class="axbd">${i===0?'가로':'세로'}</i>`:''}</button>`; }).join('');
+        $('#axChips').innerHTML=axSel.map(a=>{ const i=draft.axes.indexOf(a.id), off=!has(a); return `<button class="axc${off?' off':''}" aria-pressed="${i>=0}" ${off?'aria-disabled="true"':''} data-id="${a.id}"><span>${axLbl(a)}</span><em>${off?'앞에서 표시 안 함으로 두었어요':`${a.a} ↔ ${a.b}`}</em>${i>=0?`<i class="axbd">${i===0?'가로':'세로'}</i>`:''}</button>`; }).join('');
         $$('#onbC .axc').forEach(b=>b.onclick=()=>{
           const id=b.dataset.id, i=draft.axes.indexOf(id);
           if(b.classList.contains('off')){ toast('이 기준은 내 위치를 표시해야 고를 수 있어요'); return; }
@@ -2752,7 +2781,7 @@ function startOnboarding(){
 }
 function skipOnboarding(){
   applyDemoDefaults(); $('#onb').hidden=true; $('#onbBody').innerHTML='';
-  state.x='gender'; state.y='lead'; onboarded=true; setTab('explore');
+  state.x='age'; state.y='lead'; onboarded=true; setTab('explore');
 }
 function finishOnboarding(){
   my.name=draft.name.trim(); my.age=parseInt(draft.age,10); { const hh=parseInt(draft.height,10); my.height=(hh>0)?hh:null; }
@@ -2763,7 +2792,7 @@ function finishOnboarding(){
   draft.axes.forEach(id=>{ if(!axisById(id).kind) pref[id]={lo:.3,hi:.65}; });          // 처음 고른 두 기준은 눈에 보이는 상자로 시작
   showLoading();
   $('#onb').hidden=true; $('#onbBody').innerHTML='';
-  state.x=draft.axes[0]||'gender'; state.y=draft.axes[1]||'lead'; zoom=1; onboarded=true;
+  state.x=draft.axes[0]||'age'; state.y=draft.axes[1]||'lead'; zoom=1; onboarded=true;
   setTab('explore'); updateBadges();
   setTimeout(()=>{ hideLoading(); setTimeout(startCoach,560); },1500);
 }
@@ -2781,7 +2810,7 @@ const COACH=[
   {sel:'#stage',pad:0,r:'22px',center:true,text:'Splot에 오신 것을 환영합니다!\n만나고 싶은 사람들을 스펙트럼 위에서 살펴보세요.'},
   {sel:'.dot.t2',pad:8,r:'50%',text:'점 하나하나가 프로필이에요.\n한 번 누르면 간단히 보여 주고, 다시 누르면 얼굴 사진이 나와요.'},
   {sel:'#zone',pad:6,r:'20px',text:'내가 선호하는 쪽으로 영역을 옮기면 그에 맞는 사람들이 드러나요.'},
-  {sel:'#fltBtn',pad:6,r:'50%',text:'성적 지향과 젠더 표현은 여기서 필터로 걸러 볼 수 있어요.\n걸치지 않는 사람은 빈 원으로 나와요.'},
+  {sel:'#fltBtn',pad:6,r:'50%',text:'성적 지향과 젠더 표현은 여기서 필터로 걸러 볼 수 있어요.\n걸치지 않는 사람은 보이지 않아요.'},
   {sel:'#prefBtn',pad:6,r:'50%',text:'여기서 모든 기준의 범위를 조정해요'},
   {sel:'.tabs',pad:0,r:'0px',text:'좋아요, 채팅, 프로필은 아래 탭에 있어요'}
 ];
@@ -3140,6 +3169,55 @@ try{
     else { try{ history.back(); }catch(e){} }
   });
 }catch(e){}
+
+/* ---------- 왼쪽 가장자리에서 오른쪽으로 스와이프하면 뒤로가기 ---------- */
+(function(){
+  const phone=$('#phone'); let g=null;
+  // 지금 뒤로 갈 때 화면에서 밀려날 층: 서브 페이지 > 온보딩 단계 > 현재 탭
+  const target=()=>{
+    if(!$('#cropper').hidden||phone.classList.contains('sheet-open')||!$('#intro').hidden||!$('#coach').hidden) return null;
+    for(const id of ['pageChat','pagePhotos','pageSettings','pagePref']){ const e=$('#'+id); if(e&&!e.hidden) return e; }
+    if(!$('#onb').hidden) return onbStep>0?$('#onbBody'):null;
+    if(peekId!=null) return null;
+    if(state.tab!=='explore') return $('.screen.on');
+    return null;
+  };
+  const clear=el=>{ el.style.transition=''; el.style.transform=''; el.style.opacity=''; el.style.boxShadow=''; };
+  // 입장 애니메이션이 끌리는 동안 transform을 덮어쓰지 않게 꺼 두었다가, 층이 사라진 뒤에 되돌려요
+  const restoreAnim=el=>{ let n=0; const iv=setInterval(()=>{ if(el.hidden||el.offsetParent===null||++n>120){ el.style.animation=''; clearInterval(iv); } },400); };
+  phone.addEventListener('touchstart',e=>{
+    const t=e.touches[0], r=phone.getBoundingClientRect();
+    g=(e.touches.length===1&&t.clientX-r.left<=22)?{x:t.clientX,y:t.clientY,t0:performance.now(),dx:0,lock:false,el:null,w:r.width}:null;
+  },{capture:true,passive:true});
+  phone.addEventListener('touchmove',e=>{
+    if(!g) return;
+    const t=e.touches[0], dx=t.clientX-g.x, dy=Math.abs(t.clientY-g.y);
+    if(!g.lock){
+      if(dx>10&&dy<dx*.8){ g.lock=true; g.el=target(); if(g.el){ g.el.style.transition='none'; g.el.style.animation='none'; g.el.style.willChange='transform'; } }
+      else if(dy>24) { g=null; return; }
+    }
+    if(g.lock){
+      if(e.cancelable) e.preventDefault();                       // 브라우저가 가로 제스처를 가져가지 않게
+      g.dx=Math.max(0,dx);
+      if(g.el){ const k=Math.min(1,g.dx/g.w); g.el.style.transform='translateX('+g.dx+'px)'; g.el.style.opacity=String(1-.25*k); g.el.style.boxShadow='-6px 0 0 rgba(59,61,59,.10)'; }
+    }
+  },{capture:true,passive:false});
+  const end=()=>{
+    if(!g) return; const s=g; g=null;
+    if(!s.lock) return;
+    const fast=s.dx/Math.max(1,performance.now()-s.t0)>.55, go=s.dx>=s.w*.32||(fast&&s.dx>48);
+    if(!s.el){ if(go) handleBack(); return; }
+    const el=s.el;
+    if(go){
+      el.style.transition='transform .26s var(--ease),opacity .26s var(--ease)'; el.style.transform='translateX(100%)'; el.style.opacity='0';
+      setTimeout(()=>{ handleBack(); requestAnimationFrame(()=>{ clear(el); el.style.willChange=''; restoreAnim(el); }); },240);
+    } else {
+      el.style.transition='transform .34s var(--spring),opacity .3s'; el.style.transform='translateX(0)'; el.style.opacity='1';
+      setTimeout(()=>{ clear(el); el.style.willChange=''; restoreAnim(el); },360);
+    }
+  };
+  phone.addEventListener('touchend',end,true); phone.addEventListener('touchcancel',end,true);
+})();
 
 /* ---------- 시트를 아래로 끌어서 닫기 ---------- */
 (function(){

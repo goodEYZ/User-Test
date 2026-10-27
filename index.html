@@ -171,6 +171,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .fab-row{position:absolute;right:var(--sr);bottom:calc(var(--sb) + 8px);display:flex;gap:8px;align-items:center;z-index:10}
 .snaptog{width:34px;height:34px;border-radius:50%;border:0;background:rgba(252,252,252,.94);box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;padding:0;display:grid;place-items:center;color:#3b3d3b}
 .snaptog svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.snaptog{position:relative}
+#fieldRefresh svg{width:18px;height:18px;stroke-width:1.9}
+#fieldRefresh.spin svg{animation:rspin .75s var(--ease)}
+#fieldRefresh.has::after{content:"";position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--key2);border:1.5px solid #fcfcfc}
+@keyframes rspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .snaptog[aria-pressed="true"]{background:#3b3d3b;color:#fcfcfc}
 .metog{display:flex;align-items:center;gap:8px;background:rgba(252,252,252,.94);border-radius:999px;font-size:12px;font-weight:500;color:#3b3d3b;box-shadow:0 2px 0 rgba(59,61,59,.16);cursor:pointer;padding:5px 6px 5px 12px}
 .metog input{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:12px;background:#cfcfcf;position:relative;margin:0;cursor:pointer;transition:background .2s}
@@ -313,9 +318,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 
 /* 슬라이더 (선호 범위 = 파란색, 내 위치 = 어두운색) */
 .trk{padding:12px 0 4px}
-.epulse{position:absolute;top:50%;width:150px;height:150px;margin-top:-75px;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(closest-side,rgba(84,84,181,.34),rgba(255,188,21,.16) 62%,rgba(255,188,21,0));transform:scale(.25);opacity:1;animation:epl .8s cubic-bezier(.1,.7,.2,1) forwards}
-.epulse.l{left:-75px}.epulse.r{right:-75px}
-.trk.flt .epulse{background:radial-gradient(closest-side,rgba(255,188,21,.5),rgba(255,188,21,.18) 62%,rgba(255,188,21,0))}
 @keyframes epl{to{transform:scale(1.35);opacity:0}}
 .trk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .trk-h b{font-size:14px}
@@ -462,7 +464,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .star{color:#D2434F;font-weight:500;margin-left:3px}
 .cs-all,.cs-r{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;padding:14px 0;cursor:pointer;font:inherit;color:inherit}
 .cs-all{padding:16px;margin-bottom:6px;background:var(--surface);border-radius:16px;align-items:center;font-weight:500;font-size:15px;box-shadow:0 2px 0 rgba(59,61,59,.10)}
-.cs-r{border-bottom:.5px solid var(--line)}
+.cs-g{border-bottom:.5px solid var(--line);padding-bottom:4px}
+.cs-g:last-child{border-bottom:0}
 .cs-ck{flex:none;width:22px;height:22px;border-radius:7px;border:1.5px solid #b9bbb9;display:grid;place-items:center;transition:background-color .2s,border-color .2s;margin-top:1px}
 .cs-ck svg{width:14px;height:14px;fill:none;stroke:#fcfcfc;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:opacity .2s,transform .25s var(--spring)}
 [aria-checked="true"]>.cs-ck{background:var(--ink);border-color:var(--ink)}
@@ -470,7 +473,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .cs-t{flex:1;font-size:14.5px;line-height:1.45}
 .cs-t em{font-style:normal;font-size:12px;font-weight:500;margin-right:6px;color:var(--zone)}
 .cs-t em.o{color:var(--ink2)}
-.cs-det{margin:-6px 0 6px 34px;font-size:12.5px;color:var(--ink2);line-height:1.55}
+.cs-det{margin:-6px 0 8px 34px;font-size:12.5px;color:var(--ink2);line-height:1.55}
 .cs-det summary{cursor:pointer;padding:4px 0;list-style:none;text-decoration:underline;text-underline-offset:3px}
 .cs-det summary::-webkit-details-marker{display:none}
 .cs-det p{margin:6px 0 10px}
@@ -564,6 +567,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .onb-body{flex:1;min-height:0;overflow:auto;padding:14px 24px 12px}
 .onb-h{margin:6px 0 10px;font-size:26px;line-height:1.3;letter-spacing:-.02em;font-weight:500;white-space:pre-line}
 .onb-foot{padding:10px 24px 22px}
+.onb-demo{display:block;width:100%;margin-top:6px;border:0;background:none;color:var(--ink2);opacity:.75;font-size:12.5px;text-decoration:underline;text-underline-offset:3px;padding:10px;cursor:pointer}
 .onb-foot .btn{width:100%;flex:none;min-height:54px;font-size:16px}
 .fld{margin-bottom:24px}
 .fld label{display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:8px;letter-spacing:.02em}
@@ -815,6 +819,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       <div class="fab-left"><button class="recenter" id="recenter" hidden>범위로 돌아가기</button><button class="zr" id="zoomReset" hidden aria-label="100% 크기로 맞추기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9.5 15V9.5H15M22.5 17v5.5H17"/></svg></button></div>
       <div class="fab-row">
         <label class="metog"><span>Me</span><input type="checkbox" id="meTog" role="switch" checked aria-label="필드에 Me 표시"></label>
+        <button class="snaptog" id="fieldRefresh" aria-label="새로고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button>
       </div>
     </div>
 
@@ -928,7 +933,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
         <li>상대의 중심이 상자 안이면 진하게, 범위만 겹치면 흐리게, 겹치지 않으면 빈 원으로 보여요. 필터로 걸러진 사람은 아예 보이지 않아요.</li>
         <li>프로필을 한 번 누르면 간단히 보이고, 다시 누르면 얼굴 사진이 나와요. 바깥을 누르면 접혀요.</li>
         <li>빈 곳을 끌면 화면이 움직여요.</li>
-        <li>프로필을 끝까지 읽고 위로 세게 밀면 마음에 들어요가 전송돼요.</li>
+        <li>프로필을 끝까지 읽고 위로 세게 밀면 좋아요가 전송돼요.</li>
       </ul>
       <button class="btn primary" id="introOk">알겠어요</button>
     </div>
@@ -942,7 +947,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
       <button class="onb-skip" id="onbSkipAll">시연용 건너뛰기</button>
     </div>
     <div class="onb-body" id="onbBody"></div>
-    <div class="onb-foot"><button class="btn primary" id="onbNext">다음</button></div>
+    <div class="onb-foot"><button class="btn primary" id="onbNext">다음</button><button class="onb-demo" id="onbDemo" hidden>시연용으로만 둘러볼게요</button></div>
   </div>
 
   <div class="loading" id="loading">
@@ -1529,7 +1534,7 @@ function fit(p){ let n=0; axes.forEach(a=>{ if(!isSet(a.id)) return; const v=pv(
 function overlapStats(p){ let ov=0,n=0; axes.forEach(a=>{ if(!isSet(a.id)) return; const v=pv(p,a.id); if(!v) return; n++; if(overlap(v,ensurePref(a.id))) ov++; }); return [ov,n]; }
 // 좋아요를 보냈거나, 나를 좋아했거나, 이미 매칭된 사람은 필드에 나오지 않아요
 function visible(){
-  const pool=profiles.filter(p=>!p.gone&&!p.liked&&!p.incoming&&!p.matched&&!p.blocked);
+  const pool=profiles.filter(p=>!p.gone&&!p.pending&&!p.liked&&!p.incoming&&!p.matched&&!p.blocked);
   const pinned=pool.filter(p=>p.kept);                 // 기억한 사람은 계속 필드에 남아요
   const rest=pool.filter(p=>!p.kept)
     .map(p=>({p,s:p.penalty*1000-fit(p)*10+dayNoise(p)}))
@@ -1648,8 +1653,17 @@ function swapField(){                                              // 기준을 
   w.classList.add('leaving'); clearTimeout(swapT);
   swapT=setTimeout(()=>{ staggerNext=true; w.classList.remove('leaving'); buildField(); },500);
 }
+function snapPrefs(){                                      // 선호 범위가 격자 칸에 맞도록 처음부터 스냅해 둬요
+  if(!state.snap) return;
+  [state.x,state.y].forEach(id=>{
+    const r=ensurePref(id); if(!r) return; const st=stepOf(id), mw=minOf(id);
+    let lo=r4(Math.round(r.lo/st)*st), hi=r4(Math.round(r.hi/st)*st);
+    if(hi-lo<mw-1e-9){ hi=r4(lo+mw); if(hi>1){ hi=1; lo=r4(hi-mw); } }
+    r.lo=clamp(lo,0,1); r.hi=clamp(hi,0,1);
+  });
+}
 function buildField(){
-  ensureAxesUsable(); resetPeek();
+  ensureAxesUsable(); snapPrefs(); resetPeek();
   { const fl=flipY(); if(view.__fl!==undefined&&view.__fl!==fl) delete view.dist; view.__fl=fl; }     // 거리의 방향이 바뀌면 화면 위치를 다시 잡아요
   const world=$('#world'); world.innerHTML='';
   const X=axisById(state.x), Y=axisById(state.y);
@@ -1698,7 +1712,9 @@ function buildField(){
   });
   enterIds=new Set();
   { let le=$('#liveEmpty');
-    if(isLive()){ if(!le){ le=document.createElement('div'); le.id='liveEmpty'; le.className='live-empty'; le.innerHTML='<b>아직 다른 분이 없어요</b>전시장에 계신 분들이 들어오면 여기에 나타나요'; $('#stage').append(le); } le.hidden=plotted.length>0; }
+    if(isLive()){ if(!le){ le=document.createElement('div'); le.id='liveEmpty'; le.className='live-empty'; $('#stage').append(le); }
+      le.innerHTML=profiles.some(p=>!p.gone)?'<b>지금 보이는 분을 모두 만났어요</b>새로고침하면 새로 들어온 분이 나타나요':'<b>아직 다른 분이 없어요</b>전시장에 계신 분들이 들어오면 여기에 나타나요';
+      le.hidden=plotted.length>0; }
     else if(le) le.hidden=true; }
 
   const mx=meRange(state.x)||{lo:.5,hi:.5}, my_=fr(state.y,meRange(state.y)||{lo:.5,hi:.5});
@@ -1979,8 +1995,8 @@ function openProfile(id,mode){
   const acts=mode==='view'?'':mode==='out'
     ?`<div class="acts"><button class="btn" id="cancelBtn">좋아요 취소</button></div>`
     :(mode==='rec'
-      ?`<div class="acts"><button class="btn" id="hideBtn" style="flex:1">숨기기</button><button class="btn kbtn" id="keepBtn" aria-pressed="${p.kept}" style="flex:1.25"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 17l-5.2 2.7 1-5.9L3.5 9.7l5.9-.8z"/></svg><span class="kl">${p.kept?'기억함':'기억하기'}</span></button><button class="btn primary" id="likeBtn" style="flex:1.6">마음에 들어요</button></div>`
-      :`<div class="acts"><button class="btn" id="hideBtn">숨기기</button><button class="btn primary" id="likeBtn">마음에 들어요</button></div>`);
+      ?`<div class="acts"><button class="btn" id="hideBtn" style="flex:1">숨기기</button><button class="btn kbtn" id="keepBtn" aria-pressed="${p.kept}" style="flex:1.25"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 17l-5.2 2.7 1-5.9L3.5 9.7l5.9-.8z"/></svg><span class="kl">${p.kept?'기억함':'기억하기'}</span></button><button class="btn primary kbtn" id="likeBtn" style="flex:1.6">${HEART}<span>좋아요</span></button></div>`
+      :`<div class="acts"><button class="btn" id="hideBtn">숨기기</button><button class="btn primary kbtn" id="likeBtn">${HEART}<span>좋아요</span></button></div>`);
   ctx.p=p; ctx.mode=mode; ctx.ready=false; ctx.armed=false; clearTimeout(ctx.timer);
   openSheet(`<div class="grab"></div><button type="button" class="smore" id="pfMenu" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
     <div class="smenu" id="pfMenuBox" role="menu" hidden><button type="button" role="menuitem" id="mBlock"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>차단</button><button type="button" role="menuitem" id="mReport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2.2 4L17 13H6"/></svg>신고</button></div>${basisHTML(p,mode)}${head}
@@ -2058,7 +2074,7 @@ function toggleKeep(p){
   toast(p.kept?`${p.name}님을 기억했어요`:'기억을 해제했어요',p.kept?{label:'취소',fn:()=>toggleKeep(p)}:null);
 }
 
-/* 마음에 들어요: 보낸 사람은 필드에서 사라지고 새 사람이 추천돼요 */
+/* 좋아요: 보낸 사람은 필드에서 사라지고 새 사람이 추천돼요 */
 function likeProfile(p){
   if(p.liked) return;
   const before=new Set(shown.map(q=>q.id));
@@ -2068,9 +2084,9 @@ function likeProfile(p){
     p.liked=true; p.likedAt=Date.now(); likeN++; p._will=(!isLive()&&(likeN===SURE_AT||Math.random()<MATCH_P))?1:0;
     enterIds=new Set(visible().filter(q=>!before.has(q.id)).map(q=>q.id));
     rebuild(); updateBadges();
-    scheduleAutoMatch(p);
-    toast(`${p.name}님에게 마음에 들어요를 보냈어요`,{label:'취소',fn:()=>{
-      clearTimeout(p._autoT); likeN=Math.max(0,likeN-1); p._will=0;
+    scheduleAutoMatch(p); if(p.uid) liveLike(p);
+    toast(`${p.name}님에게 좋아요를 보냈어요`,{label:'취소',fn:()=>{
+      clearTimeout(p._autoT); likeN=Math.max(0,likeN-1); p._will=0; if(p.uid) liveUnlike(p);
       p.liked=false; enterIds=new Set([p.id]); rebuild(); updateBadges();
     }});
   },260);
@@ -2104,6 +2120,7 @@ function hideProfile(p){
 }
 function acceptIncoming(p){
   closeSheet();
+  if(p.uid){ p.incoming=false; p.declined=false; likesOut.set(p.uid,Date.now()); liveLike(p); p.matched=true; p.liked=false; onMatch(p,true); renderLikes(); updateBadges(); return; }
   p.incoming=false; p.matched=true;
   chats[p.id]={msgs:openingMsgs(p),unread:0,isNew:true};
   chatOrder.unshift(p.id);
@@ -2112,14 +2129,14 @@ function acceptIncoming(p){
 }
 function declineIncoming(p){
   closeSheet();
-  p.incoming=false; p.penalty++;
+  p.incoming=false; p.penalty++; if(p.uid) p.declined=true;
   renderLikes(); updateBadges();
-  toast('목록에서 숨겼어요',{label:'되돌리기',fn:()=>{ p.incoming=true; p.penalty--; renderLikes(); updateBadges(); }});
+  toast('목록에서 숨겼어요',{label:'되돌리기',fn:()=>{ p.incoming=true; p.penalty--; if(p.uid) p.declined=false; renderLikes(); updateBadges(); }});
 }
 function cancelOut(p){
   closeSheet();
   clearTimeout(p._autoT); likeN=Math.max(0,likeN-1); p._will=0;
-  p.liked=false;
+  p.liked=false; if(p.uid) liveUnlike(p);
   renderLikes(); updateBadges();
   toast('좋아요를 취소했어요');
 }
@@ -2217,7 +2234,9 @@ function bindTrack(block,ax,mode,onChange){
     if(ck) ck.checked=!r;
   };
   let lastEdge=null;
-  const edgePulse=side=>{ buzz(12); const p=document.createElement('i'); p.className='epulse '+side; tr.appendChild(p); setTimeout(()=>p.remove(),900); };
+  const edgePulse=side=>{ buzz(12); };
+  let pq=0; const schedPaint=()=>{ if(pq) return; pq=requestAnimationFrame(()=>{ pq=0; paint(); notify(); }); };
+  const flushPaint=()=>{ if(pq){ cancelAnimationFrame(pq); pq=0; paint(); notify(); } };
   const drag=(el,kind)=>{
     let st=null;
     el.addEventListener('pointerdown',e=>{
@@ -2236,9 +2255,9 @@ function bindTrack(block,ax,mode,onChange){
       const edge=r.lo<=.0001?'l':(r.hi>=.9999?'r':null);
       if(edge&&edge!==lastEdge&&!(r.lo<=.0001&&r.hi>=.9999&&kind==='move')) edgePulse(edge);
       lastEdge=edge;
-      paint(); notify();
+      schedPaint();
     });
-    const up=()=>{st=null; bar.classList.remove('drg')}; el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+    const up=()=>{st=null; bar.classList.remove('drg'); flushPaint()}; el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
   };
   drag(bar,'move'); drag(hl,'l'); drag(hr,'r');
   // 비어 있는 슬라이더는 트랙을 눌러도 그 자리에 값이 생겨요
@@ -2307,15 +2326,15 @@ function renderLikes(){
   const base=seg==='in'?profiles.filter(p=>p.incoming):(seg==='kept'?profiles.filter(p=>p.kept):profiles.filter(p=>p.liked));
   const list=base.map(p=>({p,f:fit(p),t:ts(p)}))
     .sort((a,b)=>srt==='fit'?(b.f-a.f||b.t-a.t):(b.t-a.t)).map(x=>x.p);
-  const hopeful=!firstRefreshDone||reserveIds.length>0;          // 새로고침하면 새 좋아요가 올 수 있을 때만
+  const hopeful=!isLive()&&(!firstRefreshDone||reserveIds.length>0);          // 새로고침하면 새 좋아요가 올 수 있을 때만
   const emptyHTML=seg==='in'
     ?`<p class="empty">아직 나를 좋아한 사람이 없어요.${hopeful?'<small>새로고침하면 당신의 인연이 기다리고 있을지도 몰라요.</small>':''}</p>`
-    :(seg==='kept'?'<p class="empty">아직 기억한 사람이 없어요.</p>':'<p class="empty">아직 마음에 들어요를 보낸 사람이 없어요.</p>');
+    :(seg==='kept'?'<p class="empty">아직 기억한 사람이 없어요.</p>':'<p class="empty">아직 좋아요를 보낸 사람이 없어요.</p>');
   $('#likeList').innerHTML=list.length?list.map(p=>{
     const [ov,nn]=overlapStats(p);
     const sub=seg==='in'?(esc(p.bio||'')||'&nbsp;'):(`${nn?`내 범위와 겹침 ${ov}/${nn}`:''}`||'&nbsp;');
     const acts=seg==='in'
-      ?`<span class="racts"><button class="rbtn no" data-a="no" aria-label="${esc(p.name)}님 숨기기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="rbtn yes" data-a="yes" aria-label="${esc(p.name)}님께 마음에 들어요"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 8.1a4.3 4.3 0 0 1 7.5 2.7C19.5 16.4 12 21 12 21z"/></svg></button></span>`
+      ?`<span class="racts"><button class="rbtn no" data-a="no" aria-label="${esc(p.name)}님 숨기기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="rbtn yes" data-a="yes" aria-label="${esc(p.name)}님께 좋아요"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 8.1a4.3 4.3 0 0 1 7.5 2.7C19.5 16.4 12 21 12 21z"/></svg></button></span>`
       :`<span class="ago">${ago(ts(p))}</span>`;
     return `<div class="row flat" role="button" tabindex="0" data-id="${p.id}">${avatarHTML(p)}<div class="t"><b>${esc(p.name)}, ${p.age}${seg==='in'?`<span class="when">${ago(ts(p))}</span>`:''}</b><span>${sub}</span></div>${acts}</div>`;
   }).join(''):emptyHTML;
@@ -2336,6 +2355,7 @@ function refreshLikes(){
   const b=$('#likeRefresh'); b.classList.add('spin');
   setTimeout(()=>{
     b.classList.remove('spin'); refreshing=false;
+    if(isLive()){ renderLikes(); toast('최신 상태예요'); return; }
     if(!firstRefreshDone){
       firstRefreshDone=true; arrivals(); renderLikes();
       toast(`새로운 좋아요 ${profiles.filter(p=>p.incoming).length}개가 도착했어요`); return;
@@ -2344,7 +2364,7 @@ function refreshLikes(){
     while(reserveIds.length){ const c=profiles[reserveIds.shift()]; if(c&&!c.liked&&!c.matched&&!c.incoming&&!c.blocked){id=c.id;break} }
     if(id===null){ toast('새로운 좋아요가 없어요'); return; }
     profiles[id].incoming=true; profiles[id].likedMeAt=Date.now(); renderLikes();
-    toast(`${profiles[id].name}님이 마음에 들어요를 보냈어요`);
+    toast(`${profiles[id].name}님이 좋아요를 보냈어요`);
   },800);
 }
 
@@ -2422,13 +2442,20 @@ function openChatProfile(){ if(chatId==null) return; openProfile(chatId,'view');
 function openChat(id){
   chatId=id; const p=profiles[id];
   { const pg=$('#pageChat'); pg.style.height=''; pg.style.bottom=''; const mi=$('#msgInp'); mi.value=''; mi.style.height=''; }
-  chats[id].unread=0; chats[id].isNew=false; updateBadges();
+  chats[id].unread=0; chats[id].isNew=false;
+  if(p.uid){ readU[p.uid]=chats[id].msgs.filter(m=>!m.me&&!m.sys).length; }
+  updateBadges();
   $('#chatHead').innerHTML=`<button class="chat-who" id="chatWho" aria-label="${esc(p.name)} 프로필 보기">${avatarHTML(p)}<h2 style="margin:0;font-size:17px">${esc(p.name)}</h2></button>`;
   $('#chatWho').onclick=openChatProfile;
   renderMsgs(); openPage('pageChat');
 }
 function sendMsg(){
   const inp=$('#msgInp'), t=inp.value.trim(); if(!t||chatId==null) return;
+  if(chats[chatId].pair){
+    const c=chats[chatId]; inp.value=''; inp.style.height='';
+    CLOUD.send(c.pair,{id:Math.random().toString(36).slice(2,10),f:myUid(),t,at:Date.now()}).catch(e=>{ toast('메시지를 보내지 못했어요. 인터넷 연결을 확인해 주세요'); });
+    return;
+  }
   chats[chatId].msgs.push({me:true,t}); inp.value=''; inp.style.height=''; renderMsgs();
   chatOrder=[chatId,...chatOrder.filter(x=>x!==chatId)];
 }
@@ -2574,7 +2601,7 @@ function openSettings(){
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
     <button class="set-btn" id="setReports">신고 내역<em id="rpCount"></em></button>
     <button class="set-btn" id="setWipe">내 정보와 기록 모두 지우기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v42 · 캐시 splot-v29</p>`;
+    <p class="autosave" style="margin-top:18px">앱 버전 v43 · 캐시 splot-v31</p>`;
   if(consent){
     const paint=()=>{ $('#archSt').textContent=consent.archive?'동의함':'동의 안 함'; $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
     const geoP=()=>{ $('#geoSt').textContent=my.loc?(my.geo?'저장됨':'가져오지 못함'):'사용 안 함'; };
@@ -2703,6 +2730,7 @@ function openPhotos(){ renderPhotos(); openPage('pagePhotos'); }
 const draft={name:'',age:'',height:'',gender:'',job:'',tags:new Set(),bio:'',loc:null,axes:[]};
 const draftMe={};
 let onbStep=0;
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>';
 const PIN='<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
 const LOGO_SVG='<svg class="w-logo" viewBox="0 0 28 28" aria-hidden="true"><circle cx="11" cy="17" r="7" fill="currentColor"/><circle cx="22" cy="8" r="3" fill="currentColor"/><circle cx="24.5" cy="17.5" r="1.8" fill="currentColor"/><circle cx="8" cy="5" r="2" fill="currentColor"/></svg>';
 function onbPhotoUpdate(){
@@ -2719,13 +2747,19 @@ function sliderStep(ids,title,sub,required){
     },
     valid:()=>required.every(id=>!!draftMe[id])};
 }
+function geoHelp(){                                        // 위치를 못 가져왔을 때, 폰 설정에서 켜는 방법을 알려줘요
+  const how=isIOS()
+    ?'설정 앱 → 개인정보 보호 및 보안 → 위치 서비스를 켜고, 아래쪽 "Safari 웹사이트"를 눌러 "앱을 사용하는 동안"으로 바꿔 주세요. (홈 화면 앱도 이 항목을 따라요)'
+    :'폰의 위치(GPS)를 켜고, Chrome 설정 → 사이트 설정 → 위치에서 허용해 주세요. 홈 화면 앱이라면 앱 아이콘을 길게 눌러 "앱 정보" → 권한 → 위치를 "앱 사용 중에만 허용"으로 바꿔 주세요.';
+  return '위치를 가져오지 못했어요. '+how+' 바꾼 뒤 앱으로 돌아와 다시 눌러 주세요. 원하지 않으면 "사용 안 함"을 골라도 돼요.';
+}
 function getGeo(){                                        // 위치를 약 1km 단위(소수점 둘째 자리)로 흐리게 받아요
   return new Promise(res=>{
     if(window.__GEO_MOCK) return res(window.__GEO_MOCK);
     if(!navigator.geolocation) return res(null);
     navigator.geolocation.getCurrentPosition(
       p=>res({lat:Math.round(p.coords.latitude*100)/100,lng:Math.round(p.coords.longitude*100)/100,at:Date.now()}),
-      ()=>res(null),{enableHighAccuracy:false,timeout:12000,maximumAge:60000});
+      e=>{ window.__geoErr=e&&e.code; res(null); },{enableHighAccuracy:false,timeout:12000,maximumAge:60000});
   });
 }
 const isStandalone=()=>{ try{ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true; }catch(e){ return false; } };
@@ -2735,7 +2769,7 @@ const STEPS=[
   {welcome:true,
     render(c){ c.innerHTML=`${LOGO_SVG}<div class="w-h">안녕하세요,<br>반가워요</div><div class="w-p">몇 가지만 알려주시면<br>바로 시작할 수 있어요</div>`; },
     valid:()=>true, label:()=>'시작해볼까요?'},
-  {gate:true,title:'홈 화면에 추가하고\n시작해 주세요',sub:'전체 화면으로 쓰고, 매칭 알림도 받을 수 있어요.',
+  {gate:true,demoLink:true,title:'홈 화면에 추가하고\n시작해 주세요',sub:'전체 화면으로 쓰고, 매칭 알림도 받을 수 있어요.',
     skip:()=>isStandalone(),
     render(c){
       const ios=isIOS();
@@ -2750,11 +2784,11 @@ const STEPS=[
       $('#csInst').onclick=()=>{ draft.cs.installed=!draft.cs.installed; $('#csInst').setAttribute('aria-checked',!!draft.cs.installed); updateOnbNext(); };
     },
     valid:()=>!!draft.cs.installed, label:()=>'계속하기'},
-  {title:'시작하기 전에\n동의가 필요해요',sub:'꼭 필요한 내용만 모았어요. 자세히 보기를 눌러 확인해 주세요.',
+  {demoLink:true,title:'시작하기 전에\n동의가 필요해요',sub:'꼭 필요한 내용만 모았어요. 자세히 보기를 눌러 확인해 주세요.',
     render(c){
       const cs=draft.cs;
       const ck='<span class="cs-ck"><svg viewBox="0 0 20 20"><path d="M4.5 10.5l3.6 3.6 7.4-8"/></svg></span>';
-      const row=(k,tag,o,txt,det)=>`<button type="button" class="cs-r" role="checkbox" aria-checked="${!!cs[k]}" data-k="${k}">${ck}<span class="cs-t"><em class="${o?'o':''}">${tag}</em>${txt}</span></button>${det?`<details class="cs-det"><summary>자세히 보기</summary><p>${det}</p></details>`:''}`;
+      const row=(k,tag,o,txt,det)=>`<div class="cs-g"><button type="button" class="cs-r" role="checkbox" aria-checked="${!!cs[k]}" data-k="${k}">${ck}<span class="cs-t"><em class="${o?'o':''}">${tag}</em>${txt}</span></button>${det?`<details class="cs-det"><summary>자세히 보기</summary><p>${det}</p></details>`:''}</div>`;
       c.innerHTML=`<button type="button" class="cs-all" role="checkbox" aria-checked="false" id="csAll">${ck}<span>전체 동의하기</span></button>`
        +row('age','필수',0,'만 19세 이상이에요','')
        +row('terms','필수',0,'개인정보 수집·이용에 동의해요','<b>수집 항목</b> 이름(닉네임), 나이, 키, 직업, 소개, 관심 태그, 사진(얼굴 사진·얼굴 없는 사진), 위치 사용 여부, 현재 위치(약 1km 단위로 흐리게 저장되며, 앱을 사용하는 동안 주기적으로 갱신돼요), 내가 직접 정한 기준별 위치<br><b>이용 목적</b> 이 앱을 쓰는 다른 참여자에게 내 프로필을 보여 주고, 매칭과 알림을 보내기 위해서예요<br><b>보관 기간</b> 전시가 끝난 날부터 30일 뒤에 삭제돼요 (아래 아카이빙에 동의하면 예외)<br><b>삭제</b> 설정에서 "내 정보 전부 지우기"를 누르면 서버에서도 바로 지워져요')
@@ -2766,11 +2800,11 @@ const STEPS=[
       upd();
     },
     onNext(){
-      consent={terms:true,sensitive:true,archive:!!draft.cs.arch,at:new Date().toISOString(),v:CONSENT_V};
+      draft.demo=false; consent={terms:true,sensitive:true,archive:!!draft.cs.arch,at:new Date().toISOString(),v:CONSENT_V};
       DB.set('S:consent',JSON.stringify(consent)); CLOUD.init();
     },
     valid:()=>draft.cs.age&&draft.cs.terms&&draft.cs.sens, label:()=>'동의하고 계속'},
-  {title:'이름이나 닉네임을\n입력해 주세요',sub:'당신을 뭐라고 부르길 바라나요?',
+  {afterConsent:true,title:'이름이나 닉네임을\n입력해 주세요',sub:'당신을 뭐라고 부르길 바라나요?',
     render(c){
       c.innerHTML=`<div class="fld"><label for="oName">이름<span class="star" aria-label="필수">*</span></label><input class="inp big" id="oName" maxlength="12" placeholder="이름" value="${esc(draft.name)}" autocomplete="off"></div><p class="reqnote"><span class="star" style="margin:0">*</span> 필수 항목</p>`;
       const i=$('#oName');
@@ -2829,11 +2863,13 @@ const STEPS=[
       const setBtns=v=>{ $('#oLocY').setAttribute('aria-pressed',v===true); $('#oLocN').setAttribute('aria-pressed',v===false); updateOnbNext(); };
       c.insertAdjacentHTML('beforeend','<p class="ins-note" id="locNote">현재 위치는 약 1km 단위로 흐리게 서버에 저장되고, 앱을 사용하는 동안 주기적으로 갱신돼요. 정확한 위치는 저장하지 않고, 다른 사람에게 거리만 보여요. 내 정보를 지우면 함께 지워져요.</p>');
       $('#oLocN').onclick=()=>{ draft.loc=false; delete my.geo; setBtns(false); };
+      if(draft.demo) $('#locNote').textContent='시연용 둘러보기에서는 위치가 서버에 저장되지 않아요.';
       $('#oLocY').onclick=async()=>{
+        if(draft.demo){ draft.loc=true; setBtns(true); return; }
         const b=$('#oLocY'); b.disabled=true; b.textContent='위치를 가져오는 중…';
         const g=await getGeo(); b.disabled=false; b.textContent='현재 위치 사용';
         if(g){ my.geo=g; draft.loc=true; setBtns(true); }
-        else{ draft.loc=null; setBtns(null); $('#locNote').textContent='위치를 가져오지 못했어요. 브라우저나 폰 설정에서 이 앱의 위치 권한을 허용한 뒤 다시 눌러 주세요. 원하지 않으면 "사용 안 함"을 골라도 돼요.'; }
+        else{ draft.loc=null; setBtns(null); $('#locNote').textContent=geoHelp(); }
       };
     },
     valid:()=>draft.loc!==null, label:()=>'다음'},
@@ -2970,7 +3006,7 @@ function renderOnb(dir){
   $('#onbBody').dataset.dir=dir||'fwd';
   $('#onbBar').style.width=(onbStep/(STEPS.length-1)*100)+'%';
   $('#onbBack').style.visibility=onbStep===0?'hidden':'visible';
-  $('#onbSkipAll').hidden=onbStep!==0;
+  $('#onbSkipAll').hidden=onbStep!==0; $('#onbDemo').hidden=!st.demoLink;
   $('#onbBody').classList.toggle('welcome',!!st.welcome); $('#onb').classList.toggle('wel',!!st.welcome);
   $('#onbBody').innerHTML=((st.welcome||st.noHead)?'':`<h1 class="onb-h">${esc(st.title)}</h1>${st.sub?`<p class="onb-sub">${esc(st.sub)}</p>`:''}`)+'<div id="onbC"></div>';
   $('#onbBody').scrollTop=0;
@@ -2984,6 +3020,10 @@ function onbNext(){
   onbStep++; while(STEPS[onbStep].skip&&STEPS[onbStep].skip()) onbStep++;
   renderOnb('fwd');
 }
+function onbDemoGo(){                                      // 서버에 저장하지 않고, 시연용 프로필만 둘러보는 온보딩이에요
+  draft.demo=true; consent=null; DB.del('S:consent');
+  onbStep=STEPS.findIndex(x=>x.afterConsent); renderOnb('fwd');
+}
 function onbBack(){ if(onbStep>0){ onbStep--; while(onbStep>0&&STEPS[onbStep].skip&&STEPS[onbStep].skip()) onbStep--; renderOnb('back'); } }
 function startOnboarding(){
   Object.assign(draft,{name:'',age:'',height:'',gender:'',job:'',tags:new Set(),bio:'',loc:null,axes:[],cs:{age:false,terms:false,sens:false,arch:false,installed:false}});
@@ -2991,7 +3031,7 @@ function startOnboarding(){
   Object.keys(draftMemo).forEach(k=>delete draftMemo[k]);
   REQUIRED.forEach(id=>{ draftMe[id]={...UNSET_BAR}; });      // 필수 항목은 처음부터 채워진 슬라이더
   FLT_IDS.forEach(id=>{ flt[id]={lo:0,hi:1}; });
-  delete my.geo; onbStep=0; $('#onb').hidden=false; renderOnb('fwd');
+  draft.demo=false; delete my.geo; onbStep=0; $('#onb').hidden=false; renderOnb('fwd');
 }
 function skipOnboarding(){
   applyDemoDefaults(); $('#onb').hidden=true; $('#onbBody').innerHTML='';
@@ -3007,7 +3047,7 @@ function finishOnboarding(){
   showLoading();
   $('#onb').hidden=true; $('#onbBody').innerHTML='';
   state.x=draft.axes[0]||'age'; state.y=draft.axes[1]||'lead'; zoom=1; onboarded=true;
-  if(consent){ enterLive(); startLive(); }
+  if(consent){ enterLive(); startLive(); } else leaveLive();
   setTab('explore'); updateBadges(); cloudSync(true);
   setTimeout(()=>{ hideLoading(); setTimeout(startCoach,560); },1500);
 }
@@ -3154,6 +3194,7 @@ $('#unmarkChip').onclick=openUnmarked;
   let px=null; c.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse') px=e.clientX; });
   c.addEventListener('pointerup',e=>{ if(px===null) return; const dx=e.clientX-px; px=null; if(Math.abs(dx)>60&&coachI<coachSteps.length-1) coachNext(); });
 })();
+$('#onbDemo').onclick=onbDemoGo;
 $('#coachNext').onclick=coachNext; $('#coachSkip').onclick=endCoach;
 $('#onbNext').onclick=onbNext; $('#onbBack').onclick=onbBack; $('#onbSkipAll').onclick=skipOnboarding;
 $('#lkIn').onclick=()=>{state.likeSeg='in';renderLikes()};
@@ -3165,6 +3206,21 @@ $('#intro').addEventListener('click',e=>{if(e.target.id==='intro') closeIntro()}
 $('#helpBtn').onclick=()=>{$('#intro').hidden=false};
 $$('#fieldLayer [data-ax]').forEach(b=>b.onclick=()=>openAxisPicker(b.dataset.ax));
 $('#swap').onclick=()=>{const t=state.x;state.x=state.y;state.y=t;swapField()};
+let refreshBusy=false;
+$('#fieldRefresh').onclick=()=>{
+  if(refreshBusy) return; refreshBusy=true;
+  const b=$('#fieldRefresh'); b.classList.remove('spin'); void b.offsetWidth; b.classList.add('spin');
+  setTimeout(()=>{
+    b.classList.remove('spin'); refreshBusy=false;
+    const fresh=profiles.filter(p=>p.pending&&!p.gone);
+    if(!fresh.length){ toast('새로 들어온 분이 없어요'); return; }
+    fresh.forEach(p=>{ p.pending=false; });
+    const before=new Set(shown.map(q=>q.id));
+    enterIds=new Set(visible().filter(q=>!before.has(q.id)).map(q=>q.id));
+    liveAdded=new Set(); updateRefreshBadge(); rebuild(); refreshPhotoUI();
+    toast(`${fresh.length}명이 새로 들어왔어요`);
+  },760);
+};
 $('#meTog').onchange=e=>{
   state.showMe=e.target.checked;
   const mk=$('#meMark'); if(mk) mk.hidden=!state.showMe;
@@ -3390,6 +3446,10 @@ const CLOUD={
       const m=this.mock(); if(m){ await m.wipe(); this.uid=null; return true; }
       const uid=await this.user(), {F,Au,db,auth}=this.mod, bt=F.writeBatch(db);
       ['users','profiles','photos'].forEach(c=>bt.delete(F.doc(db,c,uid)));
+      try{                                                 // 내가 보낸 좋아요와 내가 속한 대화방도 지워요
+        const lk=await F.getDocs(F.query(F.collection(db,'likes'),F.where('from','==',uid))); lk.forEach(d=>bt.delete(d.ref));
+        const ch=await F.getDocs(F.query(F.collection(db,'chats'),F.where('members','array-contains',uid))); ch.forEach(d=>bt.delete(d.ref));
+      }catch(e){ console.warn('wipe extra',e); }
       await Promise.race([bt.commit(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),20000))]);
       try{ await Au.deleteUser(auth.currentUser); }catch(e){ try{ await Au.signOut(auth); }catch(_){} }
       this.uid=null; return true;
@@ -3402,6 +3462,50 @@ const CLOUD={
       await this.user(); const {F,db}=this.mod;
       return F.onSnapshot(F.collection(db,'profiles'),snap=>{ try{ cb(snap.docChanges().map(c=>({type:c.type,id:c.doc.id,data:c.doc.data()}))); }catch(e){ console.warn('live cb',e); } },e=>{ this.err=String((e&&e.code)||e); console.warn('cloud listen',e); });
     }catch(e){ this.err=String((e&&e.code)||e); return null; }
+  },
+  async like(to){
+    const m=this.mock(); if(m) return m.like(to);
+    if(!await this.init()) throw new Error('offline');
+    const uid=await this.user(), {F,db}=this.mod;
+    await Promise.race([F.setDoc(F.doc(db,'likes',uid+'_'+to),{from:uid,to,at:Date.now()}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+  },
+  async unlike(to){
+    const m=this.mock(); if(m) return m.unlike(to);
+    if(!await this.init()) throw new Error('offline');
+    const uid=await this.user(), {F,db}=this.mod;
+    await Promise.race([F.deleteDoc(F.doc(db,'likes',uid+'_'+to)),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+  },
+  async listenLikes(onOut,onIn){                           // 내가 보낸 좋아요 / 나에게 온 좋아요
+    if(!await this.init()) return [];
+    const m=this.mock(); if(m) return m.listenLikes(onOut,onIn);
+    try{
+      const uid=await this.user(), {F,db}=this.mod, C=F.collection(db,'likes');
+      const f=cb=>snap=>{ try{ cb(snap.docs.map(d=>d.data())); }catch(e){ console.warn('likes cb',e); } };
+      const er=e=>{ this.err=String((e&&e.code)||e); console.warn('likes listen',e); };
+      return [F.onSnapshot(F.query(C,F.where('from','==',uid)),f(onOut),er),F.onSnapshot(F.query(C,F.where('to','==',uid)),f(onIn),er)];
+    }catch(e){ this.err=String((e&&e.code)||e); return []; }
+  },
+  async openChat(to){                                      // 매칭된 두 사람의 대화방을 만들어요 (이미 있으면 그대로 둬요)
+    const m=this.mock(); if(m) return m.openChat(to);
+    if(!await this.init()) throw new Error('offline');
+    const uid=await this.user(), {F,db}=this.mod, id=[uid,to].sort().join('_');
+    const ref=F.doc(db,'chats',id);
+    if(!(await F.getDoc(ref)).exists()) await F.setDoc(ref,{members:[uid,to].sort(),createdAt:Date.now()});
+    return id;
+  },
+  async listenChats(cb){
+    if(!await this.init()) return null;
+    const m=this.mock(); if(m) return m.listenChats(cb);
+    try{
+      const uid=await this.user(), {F,db}=this.mod;
+      return F.onSnapshot(F.query(F.collection(db,'chats'),F.where('members','array-contains',uid)),snap=>{ try{ cb(snap.docs.map(d=>({id:d.id,...d.data()}))); }catch(e){ console.warn('chat cb',e); } },e=>{ this.err=String((e&&e.code)||e); console.warn('chat listen',e); });
+    }catch(e){ this.err=String((e&&e.code)||e); return null; }
+  },
+  async send(pair,msg){
+    const m=this.mock(); if(m) return m.send(pair,msg);
+    if(!await this.init()) throw new Error('offline');
+    const {F,db}=this.mod;
+    await Promise.race([F.updateDoc(F.doc(db,'chats',pair),{msgs:F.arrayUnion(msg),updatedAt:Date.now()}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
   },
   async big(uid){                                          // 프로필을 열 때 큰 사진을 따로 받아요
     try{
@@ -3452,7 +3556,8 @@ function cloudSync(force){                                // 내 정보가 바�
 }
 
 /* ---------- 실제 참여자 (서버에 있는 공개 프로필) ---------- */
-let liveOn=false, liveUnsub=null, liveDirty=false, pendingSoc={}, liveAdded=new Set();
+let likesOut=new Map(), likesIn=new Map(), likeRdy={out:false,in:false}, chatDocs=[], readU={}, likesFirst=true;
+let liveOn=false, liveUnsub=null, liveDirty=false, pendingSoc={}, liveAdded=new Set(), liveReady=false;
 const DUMMY=[...profiles];
 const isLive=()=>!!consent;
 function enterLive(){                                      // 동의하고 시작한 사람은 시연용 프로필 대신 실제 참여자만 봐요
@@ -3462,17 +3567,19 @@ function enterLive(){                                      // 동의하고 시�
 }
 function leaveLive(){
   if(!liveOn) return; liveOn=false;
-  if(liveUnsub){ try{ liveUnsub(); }catch(e){} liveUnsub=null; }
-  profiles.length=0; DUMMY.forEach(p=>profiles.push(p)); pendingSoc={}; liveAdded=new Set();
+  [].concat(liveUnsub||[]).forEach(u=>{ try{ if(typeof u==='function') u(); }catch(e){} }); liveUnsub=null;
+  likesOut=new Map(); likesIn=new Map(); likeRdy={out:false,in:false}; chatDocs=[]; readU={}; likesFirst=true;
+  profiles.length=0; DUMMY.forEach(p=>profiles.push(p)); pendingSoc={}; liveAdded=new Set(); liveReady=false; liveDirty=false;
 }
 const hav=(a,b)=>{ const R=6371, r=x=>x*Math.PI/180, dl=r(b.lat-a.lat), dg=r(b.lng-a.lng), q=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2; return 2*R*Math.asin(Math.sqrt(q)); };
 function distKm(p){ if(p.geo&&my.geo) return hav(p.geo,my.geo); return p.uid?null:p.km; }
-function applySoc(p,r){ p.liked=!!r[0]; p.likedAt=r[1]||0; p.likedMeAt=r[2]||0; p.kept=!!r[3]; p.keptAt=r[4]||0; p.penalty=r[5]||0; p.incoming=!!r[6]; p.matched=!!r[7]; p.viewedAt=r[8]||0; p._will=0; p.blocked=!!r[10]; }
+function applySoc(p,r){ p.declined=!!r[11]; p.liked=!!r[0]; p.likedAt=r[1]||0; p.likedMeAt=r[2]||0; p.kept=!!r[3]; p.keptAt=r[4]||0; p.penalty=r[5]||0; p.incoming=!!r[6]; p.matched=!!r[7]; p.viewedAt=r[8]||0; p._will=0; p.blocked=!!r[10]; }
 function mkRemote(uid,d){
   let p=profiles.find(x=>x.uid===uid), fresh=false;
   if(!p){
     fresh=true;
     p={id:profiles.length,uid,v:{},hide:new Set(),tags:[],h:null,km:0,liked:false,likedAt:0,likedMeAt:0,kept:false,keptAt:0,penalty:0,incoming:false,matched:false};
+    p.pending=liveReady;                                   // 처음 불러온 뒤에 들어온 사람은 새로고침을 눌러야 필드에 나타나요
     profiles.push(p);
     if(pendingSoc[uid]){ applySoc(p,pendingSoc[uid]); delete pendingSoc[uid]; }
   }
@@ -3484,7 +3591,7 @@ function mkRemote(uid,d){
   });
   p.orig={name:p.name,bio:p.bio,gender:p.gender,age:p.age,job:p.job};
   const th=d.thumb||{}; if(!p._bigLoaded){ if(th.fc) photos['p'+p.id]=th.fc; else delete photos['p'+p.id]; if(th.nf) photos['q'+p.id]=th.nf; else delete photos['q'+p.id]; }
-  p._new=fresh; return p;
+  p._new=fresh; if(fresh) setTimeout(applyLikeState,0); return p;
 }
 function onLiveChanges(ch){
   ch.forEach(c=>{
@@ -3492,19 +3599,83 @@ function onLiveChanges(ch){
     if(c.type==='removed'){ const p=profiles.find(x=>x.uid===c.id); if(p){ p.gone=true; liveDirty=true; } return; }
     const p=mkRemote(c.id,c.data||{}); if(p._new){ liveAdded.add(p.id); } delete p._new; liveDirty=true;
   });
+  updateRefreshBadge();
 }
+const pendingCount=()=>profiles.filter(p=>p.pending&&!p.gone).length;
+function updateRefreshBadge(){ const b=$('#fieldRefresh'); if(b) b.classList.toggle('has',pendingCount()>0); }
 async function startLive(){
   if(!isLive()||liveUnsub) return;
   liveUnsub=true;
-  const u=await CLOUD.listen(onLiveChanges);
+  const u=await CLOUD.listen(ch=>{ onLiveChanges(ch); liveDirty=true; applyLikeState(); });
   liveUnsub=u||null;
+  await startLikes();
 }
 setInterval(()=>{                                          // 새로 들어온 사람이 있으면 방해되지 않는 때에 필드에 반영해요
-  if(!liveDirty||!onboarded) return;
+  if(!liveDirty||!onboarded||liveReady) return;                 // 처음 한 번만 자동으로 채워요
   if(dragging||peekId!=null||$('#phone').classList.contains('sheet-open')||!$('#onb').hidden) return;
-  liveDirty=false; enterIds=new Set([...enterIds,...liveAdded]); liveAdded=new Set();
+  liveDirty=false; liveReady=true; liveAdded=new Set(); enterIds=new Set(profiles.filter(p=>!p.gone).map(p=>p.id));
   rebuild(); refreshPhotoUI(); updateBadges();
 },800);
+
+/* 좋아요 · 매칭 · 채팅 (서버) */
+const myUid=()=>CLOUD.uid;
+function applyLikeState(){
+  if(!liveOn||!likeRdy.out||!likeRdy.in) return;
+  const first=likesFirst; likesFirst=false; let changed=false;
+  profiles.forEach(p=>{
+    if(!p.uid) return;
+    const o=likesOut.get(p.uid), i=likesIn.get(p.uid), was=p.matched, wl=p.liked, wi=p.incoming;
+    p.matched=!!(o&&i); p.liked=!!(o&&!i); p.incoming=!!(i&&!o&&!p.declined);
+    p.likedAt=o||0; p.likedMeAt=i||0;
+    if(wl!==p.liked||wi!==p.incoming||was!==p.matched) changed=true;
+    if(p.matched&&!was) onMatch(p,!first);
+  });
+  buildChats();
+  updateBadges(); if(state.tab==='likes') renderLikes();
+  if(changed&&state.tab==='explore'&&!dragging&&peekId==null) syncRecs();
+}
+function onMatch(p,announce){
+  if(p._mShown) return; p._mShown=true;
+  Promise.resolve(p._likeP).then(()=>CLOUD.openChat(p.uid)).catch(e=>console.warn('openChat',e));
+  buildChats();
+  updateBadges(); if(state.tab==='likes') renderLikes();
+  if(announce) pushBanner(p,`${p.name}님과 매칭됐어요`,()=>{ setTab('chat'); if(chats[p.id]) openChat(p.id); });
+}
+function buildChats(){                                     // 서버의 대화방 문서를 앱의 채팅 목록으로 바꿔요
+  if(!liveOn) return;
+  const me_=myUid(); if(!me_) return;
+  const seen=new Set(), rows=[];
+  chatDocs.forEach(d=>{
+    const other=(d.members||[]).find(x=>x!==me_), p=profiles.find(q=>q.uid===other); if(!p) return;
+    seen.add(p.id);
+    const real=(Array.isArray(d.msgs)?d.msgs.slice():[]).sort((a,b)=>(a.at||0)-(b.at||0));
+    const open=chatId===p.id&&!$('#pageChat').hidden;
+    const theirs=real.filter(m=>m.f!==me_).length;
+    if(open) readU[other]=theirs;
+    const rd=readU[other], prev=chats[p.id];
+    const msgs=[{sys:true,t:'매칭됐어요'},...real.map(m=>m.f===me_?{me:true,t:m.t}:{t:m.t})];
+    chats[p.id]={msgs,unread:Math.max(0,theirs-(rd||0)),isNew:rd==null&&real.length===0,pair:d.id,uid:other};
+    rows.push([p.id,real.length?real[real.length-1].at:(d.createdAt||0)]);
+    if(open&&prev&&prev.msgs.length!==msgs.length) renderMsgs();
+  });
+  Object.keys(chats).forEach(k=>{ if(!seen.has(+k)) delete chats[k]; });
+  chatOrder=rows.sort((a,b)=>b[1]-a[1]).map(r=>r[0]);
+  if(state.tab==='chat') renderChatList();
+}
+async function startLikes(){
+  const u=await CLOUD.listenLikes(list=>{ likesOut=new Map(list.map(x=>[x.to,x.at||0])); likeRdy.out=true; applyLikeState(); },list=>{ likesIn=new Map(list.map(x=>[x.from,x.at||0])); likeRdy.in=true; applyLikeState(); });
+  const c=await CLOUD.listenChats(docs=>{ chatDocs=docs; buildChats(); updateBadges(); });
+  liveUnsub=[].concat(liveUnsub===true?[]:liveUnsub||[],u||[],c||[]);
+}
+function liveLike(p){                                      // 좋아요 보내기 (서버)
+  likesOut.set(p.uid,Date.now()); likeRdy.out=likeRdy.out||false;
+  const pr=CLOUD.like(p.uid); p._likeP=pr.catch(()=>{});
+  pr.catch(e=>{ likesOut.delete(p.uid); p.liked=false; toast('좋아요를 보내지 못했어요. 인터넷 연결을 확인해 주세요'); rebuild(); updateBadges(); });
+}
+function liveUnlike(p){
+  likesOut.delete(p.uid);
+  CLOUD.unlike(p.uid).catch(e=>{ toast('취소하지 못했어요. 인터넷 연결을 확인해 주세요'); });
+}
 async function loadBig(p){                                 // 프로필을 열면 큰 사진을 받아서 작은 사진과 바꿔요
   if(!p.uid||p._bigLoaded||p._bigBusy) return; p._bigBusy=true;
   const d=await CLOUD.big(p.uid); p._bigBusy=false; if(!d) return; p._bigLoaded=true;
@@ -3534,7 +3705,8 @@ const SAVE_KEY='S:app';
 let onboarded=false, lastSaved='', bootDone=false;
 function snapshot(){
   return JSON.stringify({v:1,onboarded:true,my,me,pref,ax:[state.x,state.y],seg:state.likeSeg,srt:state.likeSort,
-    socU:liveOn?{...pendingSoc,...Object.fromEntries(profiles.filter(p=>p.uid).map(p=>[p.uid,[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,0,p.blocked?1:0]]))}:undefined,
+    socU:liveOn?{...pendingSoc,...Object.fromEntries(profiles.filter(p=>p.uid).map(p=>[p.uid,[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,0,p.blocked?1:0,p.declined?1:0]]))}:undefined,
+    readU:liveOn?readU:undefined,
     soc:liveOn?[]:profiles.map(p=>[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,p._will?1:0,p.blocked?1:0]),
     chats,chatOrder,autoCount,likeN,flt,reserve:reserveIds,first:firstRefreshDone});
 }
@@ -3557,7 +3729,7 @@ function restoreState(o){
     p.liked=!!r[0]; p.likedAt=r[1]||0; p.likedMeAt=r[2]||0; p.kept=!!r[3]; p.keptAt=r[4]||0; p.penalty=r[5]||0; p.incoming=!!r[6]; p.matched=!!r[7]; p.viewedAt=r[8]||0; p._will=r[9]?1:0; p.blocked=!!r[10]; });
   Object.keys(chats).forEach(k=>delete chats[k]); if(!liveOn) Object.assign(chats,o.chats||{});
   chatOrder=(!liveOn&&Array.isArray(o.chatOrder))?o.chatOrder:[];
-  if(liveOn) pendingSoc=o.socU||{};
+  if(liveOn){ pendingSoc=o.socU||{}; readU=o.readU||{}; }
   autoCount=o.autoCount||0; likeN=o.likeN||0;
   FLT_IDS.forEach(id=>{ const f=o.flt&&o.flt[id]; flt[id]=f?{lo:f.lo,hi:f.hi}:{lo:0,hi:1}; });
   if(!liveOn){ reserveIds=Array.isArray(o.reserve)?o.reserve:reserveIds; firstRefreshDone=!!o.first; }

@@ -2567,7 +2567,8 @@ function openSettings(){
     <button class="set-btn" id="setOnb">온보딩 다시 하기</button>
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
     <button class="set-btn" id="setReports">신고 내역<em id="rpCount"></em></button>
-    <button class="set-btn" id="setWipe">내 정보와 기록 모두 지우기</button>`;
+    <button class="set-btn" id="setWipe">내 정보와 기록 모두 지우기</button>
+    <p class="autosave" style="margin-top:18px">앱 버전 v38 · 캐시 splot-v25</p>`;
   if(consent){
     const paint=()=>{ $('#archSt').textContent=consent.archive?'동의함':'동의 안 함'; $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
     paint();

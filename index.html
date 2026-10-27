@@ -479,6 +479,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .ins-ol li::before{content:counter(n);flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fcfcfc;font-size:12.5px;font-weight:500;display:grid;place-items:center}
 .ins-ol svg{width:18px;height:18px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ins-note{margin:16px 0 0;font-size:12.5px;line-height:1.55;color:var(--ink2)}
+.live-empty{position:absolute;left:50%;top:17%;transform:translateX(-50%);width:min(82%,260px);text-align:center;font-size:13px;line-height:1.55;color:var(--ink2);pointer-events:none;z-index:4}
+.live-empty b{display:block;font-size:14.5px;font-weight:500;color:var(--ink);margin-bottom:3px}
 .reqnote{margin:18px 0 0;font-size:12px;color:var(--ink2)}
 .basis{display:flex;gap:8px;margin:2px 0 14px}
 .basis .bs{flex:1;min-width:0;background:var(--field);border:1.5px solid var(--zone);border-radius:14px;padding:9px 12px;display:flex;flex-direction:column;gap:1px}
@@ -1074,7 +1076,7 @@ function fmtRange(ax,r){
   return `${lo?'최소':f(r.lo)} ~ ${hi?'최대':f(r.hi)}`;
 }
 function valP(p,ax){
-  if(ax.kind==='dist') return `약 ${Math.max(5,Math.ceil(p.km/5)*5)}km`;      // 정확한 거리는 숨기고 5km 단위로
+  if(ax.kind==='dist'){ const km=distKm(p); return km==null?'표시 안 함':(km<5?'5km 이내':`약 ${Math.ceil(km/5)*5}km`); }      // 정확한 거리는 숨기고 5km 단위로
   if(ax.kind==='age'){const d=p.age-my.age;return d===0?'동갑':(d>0?`나보다 ${d}살 연상`:`나보다 ${-d}살 연하`)}
   if(my.height==null) return `${p.h}cm`;
   const d=p.h-my.height;return d===0?'나와 비슷한 키':(d>0?`나보다 ${d}cm 큼`:`나보다 ${-d}cm 작음`);
@@ -1276,7 +1278,7 @@ function pv(p,id){
   const ax=axisById(id);
   if(ax.kind){
     let v;
-    if(ax.kind==='dist') v=Math.sqrt(p.km/300);
+    if(ax.kind==='dist'){ const km=distKm(p); if(km==null) return null; v=Math.sqrt(km/300); }
     else if(ax.kind==='age') v=.5+(p.age-my.age)/30;
     else v=.5+(p.h-(my.height==null?168:my.height))/80;
     v=clamp(v,0,1); return {lo:v,hi:v};
@@ -1365,7 +1367,7 @@ function initSocial(){
 // 최초 새로고침에 나를 좋아한 사람과 매칭된 채팅이 도착해요 (시연용)
 function arrivals(){
   const offs=[3*36e5,20*6e4,26*36e5,6*36e5,2*36e5];
-  incomingIds.forEach((id,i)=>{ const p=profiles[id]; if(p.liked||p.matched||p.blocked) return; p.incoming=true; p.likedMeAt=Date.now()-offs[i]; });
+  incomingIds.forEach((id,i)=>{ const p=profiles[id]; if(!p||p.uid) return; if(p.liked||p.matched||p.blocked) return; p.incoming=true; p.likedMeAt=Date.now()-offs[i]; });
 }
 initSocial();
 
@@ -1496,7 +1498,7 @@ function dotInner(p){ const f=facePh(p); return `<span class="lyr nf">${layerNF(
 let storageWarned=false;
 async function savePhoto(key,file,pre){
   try{
-    const data=pre||await toSquare(file);
+    const data=pre||await toSquare(file,(key==='me'||key==='meNF')?720:480);
     photos[key]=data;
     const ok=await DB.set(key,data);
     if(!ok&&!storageWarned){storageWarned=true;toast('이 기기에서는 저장이 안 돼요. 새로고침하면 사라져요')}
@@ -1527,7 +1529,7 @@ function fit(p){ let n=0; axes.forEach(a=>{ if(!isSet(a.id)) return; const v=pv(
 function overlapStats(p){ let ov=0,n=0; axes.forEach(a=>{ if(!isSet(a.id)) return; const v=pv(p,a.id); if(!v) return; n++; if(overlap(v,ensurePref(a.id))) ov++; }); return [ov,n]; }
 // 좋아요를 보냈거나, 나를 좋아했거나, 이미 매칭된 사람은 필드에 나오지 않아요
 function visible(){
-  const pool=profiles.filter(p=>!p.liked&&!p.incoming&&!p.matched&&!p.blocked);
+  const pool=profiles.filter(p=>!p.gone&&!p.liked&&!p.incoming&&!p.matched&&!p.blocked);
   const pinned=pool.filter(p=>p.kept);                 // 기억한 사람은 계속 필드에 남아요
   const rest=pool.filter(p=>!p.kept)
     .map(p=>({p,s:p.penalty*1000-fit(p)*10+dayNoise(p)}))
@@ -1695,6 +1697,9 @@ function buildField(){
     p.el=d; world.append(d);
   });
   enterIds=new Set();
+  { let le=$('#liveEmpty');
+    if(isLive()){ if(!le){ le=document.createElement('div'); le.id='liveEmpty'; le.className='live-empty'; le.innerHTML='<b>아직 다른 분이 없어요</b>전시장에 계신 분들이 들어오면 여기에 나타나요'; $('#stage').append(le); } le.hidden=plotted.length>0; }
+    else if(le) le.hidden=true; }
 
   const mx=meRange(state.x)||{lo:.5,hi:.5}, my_=fr(state.y,meRange(state.y)||{lo:.5,hi:.5});
   const mk=document.createElement('div');
@@ -1951,7 +1956,7 @@ function basisHTML(p,mode){
 function openProfile(id,mode){
   mode=mode||'rec';
   closePeek();
-  const p=profiles[id];
+  const p=profiles[id]; loadBig(p);
   profiles.forEach(q=>{
     const on=(q.id===id&&mode==='rec');
     if(q.el) q.el.classList.toggle('sel',on); if(q.eb) q.eb.classList.toggle('sel',on);
@@ -2060,7 +2065,7 @@ function likeProfile(p){
   closeSheet();
   p.el&&p.el.classList.add('leaving');
   setTimeout(()=>{
-    p.liked=true; p.likedAt=Date.now(); likeN++; p._will=(likeN===SURE_AT||Math.random()<MATCH_P)?1:0;
+    p.liked=true; p.likedAt=Date.now(); likeN++; p._will=(!isLive()&&(likeN===SURE_AT||Math.random()<MATCH_P))?1:0;
     enterIds=new Set(visible().filter(q=>!before.has(q.id)).map(q=>q.id));
     rebuild(); updateBadges();
     scheduleAutoMatch(p);
@@ -2336,7 +2341,7 @@ function refreshLikes(){
       toast(`새로운 좋아요 ${profiles.filter(p=>p.incoming).length}개가 도착했어요`); return;
     }
     let id=null;
-    while(reserveIds.length){ const c=profiles[reserveIds.shift()]; if(!c.liked&&!c.matched&&!c.incoming&&!c.blocked){id=c.id;break} }
+    while(reserveIds.length){ const c=profiles[reserveIds.shift()]; if(c&&!c.liked&&!c.matched&&!c.incoming&&!c.blocked){id=c.id;break} }
     if(id===null){ toast('새로운 좋아요가 없어요'); return; }
     profiles[id].incoming=true; profiles[id].likedMeAt=Date.now(); renderLikes();
     toast(`${profiles[id].name}님이 마음에 들어요를 보냈어요`);
@@ -2559,6 +2564,7 @@ function openSettings(){
   $('#setBody').innerHTML=`
     ${consent?`<div class="grp first">내 정보와 동의</div>
     <button class="set-btn" id="setArch">프로젝트 아카이빙 동의<em id="archSt"></em></button>
+    <button class="set-btn" id="setGeo">내 위치 새로 가져오기<em id="geoSt"></em></button>
     <button class="set-btn" id="setCloud">서버 연결<em id="cloudSt"></em></button>`:''}
     <div class="grp${consent?'':' first'}">시연용</div>
     <button class="set-btn" id="setPhotos">더미 프로필 관리<em id="phCount2"></em></button>
@@ -2568,9 +2574,15 @@ function openSettings(){
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
     <button class="set-btn" id="setReports">신고 내역<em id="rpCount"></em></button>
     <button class="set-btn" id="setWipe">내 정보와 기록 모두 지우기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v38 · 캐시 splot-v25</p>`;
+    <p class="autosave" style="margin-top:18px">앱 버전 v42 · 캐시 splot-v29</p>`;
   if(consent){
     const paint=()=>{ $('#archSt').textContent=consent.archive?'동의함':'동의 안 함'; $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
+    const geoP=()=>{ $('#geoSt').textContent=my.loc?(my.geo?'저장됨':'가져오지 못함'):'사용 안 함'; };
+    geoP();
+    $('#setGeo').onclick=async()=>{
+      const g=await getGeo(); if(!g){ toast('위치를 가져오지 못했어요. 위치 권한을 확인해 주세요'); return; }
+      my.geo=g; my.loc=true; geoP(); cloudBackoff=0; cloudSync(true); toast('내 위치를 새로 저장했어요');
+    };
     paint();
     $('#setArch').onclick=()=>{ consent.archive=!consent.archive; DB.set('S:consent',JSON.stringify(consent)); cloudBackoff=0; cloudSync(true); paint(); toast(consent.archive?'아카이빙에 동의했어요':'아카이빙 동의를 철회했어요'); };
     $('#setCloud').onclick=async()=>{ $('#cloudSt').textContent='연결 중'; const ok=await CLOUD.init(); cloudBackoff=0; if(ok) cloudSync(true); paint(); toast(ok?'서버에 연결됐어요':'연결하지 못했어요 ('+CLOUD.err+')'); };
@@ -2599,7 +2611,7 @@ async function wipeAll(){
     const ok=await CLOUD.wipe();
     if(!ok){ toast('서버에서 지우지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요'); return; }
   }
-  consent=null; lastCloud=''; pendStr=''; clearTimeout(cloudT); await DB.del('S:consent');
+  delete my.geo; consent=null; lastCloud=''; pendStr=''; lastPs=''; leaveLive(); clearTimeout(cloudT); await DB.del('S:consent');
   onboarded=false; lastSaved='';
   await DB.del(SAVE_KEY); await DB.del('me'); await DB.del('meNF');
   delete photos.me; delete photos.meNF;
@@ -2707,6 +2719,15 @@ function sliderStep(ids,title,sub,required){
     },
     valid:()=>required.every(id=>!!draftMe[id])};
 }
+function getGeo(){                                        // 위치를 약 1km 단위(소수점 둘째 자리)로 흐리게 받아요
+  return new Promise(res=>{
+    if(window.__GEO_MOCK) return res(window.__GEO_MOCK);
+    if(!navigator.geolocation) return res(null);
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:Math.round(p.coords.latitude*100)/100,lng:Math.round(p.coords.longitude*100)/100,at:Date.now()}),
+      ()=>res(null),{enableHighAccuracy:false,timeout:12000,maximumAge:60000});
+  });
+}
 const isStandalone=()=>{ try{ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true; }catch(e){ return false; } };
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let installEv=null; window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEv=e; });
@@ -2725,8 +2746,10 @@ const STEPS=[
         :`<ol class="ins-ol"><li><span>브라우저 오른쪽 위 메뉴(⋮)를 눌러요</span></li><li><span>"홈 화면에 추가" 또는 "앱 설치"를 눌러요</span></li><li><span>홈 화면에 생긴 <b>Splot</b>을 열어요</span></li></ol>${installEv?'<button class="btn" id="oInstall" style="margin-top:14px;width:100%">홈 화면에 추가</button>':''}`;
       c.insertAdjacentHTML('beforeend','<p class="ins-note">홈 화면에서 연 뒤에 시작하면 내 정보가 그 앱에 저장돼요. 브라우저에서 시작한 정보는 홈 화면 앱으로 옮겨지지 않아요.</p>');
       const b=$('#oInstall'); if(b) b.onclick=()=>{ installEv.prompt(); installEv=null; b.remove(); };
+      c.insertAdjacentHTML('beforeend',`<button type="button" class="cs-all" role="checkbox" aria-checked="${!!draft.cs.installed}" id="csInst" style="margin-top:22px"><span class="cs-ck"><svg viewBox="0 0 20 20"><path d="M4.5 10.5l3.6 3.6 7.4-8"/></svg></span><span>홈 화면에 추가했습니다.</span></button>`);
+      $('#csInst').onclick=()=>{ draft.cs.installed=!draft.cs.installed; $('#csInst').setAttribute('aria-checked',!!draft.cs.installed); updateOnbNext(); };
     },
-    valid:()=>true, label:()=>'브라우저에서 계속하기'},
+    valid:()=>!!draft.cs.installed, label:()=>'계속하기'},
   {title:'시작하기 전에\n동의가 필요해요',sub:'꼭 필요한 내용만 모았어요. 자세히 보기를 눌러 확인해 주세요.',
     render(c){
       const cs=draft.cs;
@@ -2734,8 +2757,8 @@ const STEPS=[
       const row=(k,tag,o,txt,det)=>`<button type="button" class="cs-r" role="checkbox" aria-checked="${!!cs[k]}" data-k="${k}">${ck}<span class="cs-t"><em class="${o?'o':''}">${tag}</em>${txt}</span></button>${det?`<details class="cs-det"><summary>자세히 보기</summary><p>${det}</p></details>`:''}`;
       c.innerHTML=`<button type="button" class="cs-all" role="checkbox" aria-checked="false" id="csAll">${ck}<span>전체 동의하기</span></button>`
        +row('age','필수',0,'만 19세 이상이에요','')
-       +row('terms','필수',0,'개인정보 수집·이용에 동의해요','<b>수집 항목</b> 이름(닉네임), 나이, 키, 직업, 소개, 관심 태그, 위치 사용 여부, 내가 직접 정한 기준별 위치<br><b>이용 목적</b> 다른 참여자에게 내 프로필을 보여 주고, 매칭과 알림을 보내기 위해서예요<br><b>보관 기간</b> 전시가 끝난 날부터 30일 뒤에 삭제돼요 (아래 아카이빙에 동의하면 예외)<br><b>삭제</b> 설정에서 "내 정보 전부 지우기"를 누르면 서버에서도 바로 지워져요')
-       +row('sens','필수',0,'민감정보(성적 지향·젠더 표현) 수집·이용에 동의해요','<b>항목</b> 성적 지향, 젠더 표현 범위<br><b>이용 목적</b> 같은 기준을 가진 참여자끼리 서로의 범위를 보고 만나기 위해서예요. 다른 참여자에게는 범위로만 보이고 이름과 함께 쓰이지는 않아요<br><b>동의하지 않을 수 있지만</b>, 이 정보가 서비스의 핵심이라 동의하지 않으면 시작할 수 없어요 (시연용 둘러보기는 가능)')
+       +row('terms','필수',0,'개인정보 수집·이용에 동의해요','<b>수집 항목</b> 이름(닉네임), 나이, 키, 직업, 소개, 관심 태그, 사진(얼굴 사진·얼굴 없는 사진), 위치 사용 여부, 현재 위치(약 1km 단위로 흐리게 저장되며, 앱을 사용하는 동안 주기적으로 갱신돼요), 내가 직접 정한 기준별 위치<br><b>이용 목적</b> 이 앱을 쓰는 다른 참여자에게 내 프로필을 보여 주고, 매칭과 알림을 보내기 위해서예요<br><b>보관 기간</b> 전시가 끝난 날부터 30일 뒤에 삭제돼요 (아래 아카이빙에 동의하면 예외)<br><b>삭제</b> 설정에서 "내 정보 전부 지우기"를 누르면 서버에서도 바로 지워져요')
+       +row('sens','필수',0,'민감정보(성적 지향·젠더 표현) 수집·이용에 동의해요','<b>항목</b> 성적 지향, 젠더 표현 범위<br><b>공개 범위</b> 내 성적 지향과 젠더 표현 범위가, 이 앱을 쓰는 다른 참여자에게 내 닉네임·사진·소개와 함께 보여요<br><b>주의</b> 앱에 접속한 사람이면 누구나 볼 수 있는 정보예요. 프로필을 자동으로 긁어 가려는 시도까지 완전히 막을 수는 없어요<br><b>동의하지 않을 수 있지만</b>, 이 정보가 서비스의 핵심이라 동의하지 않으면 시작할 수 없어요 (시연용 둘러보기는 가능)')
        +row('arch','선택',1,'프로젝트 아카이빙에 동의해요','졸업 작품 기록을 위해 보관 기간이 지난 뒤에도 닉네임과 프로필 정보(채팅 내용은 제외)를 보관하고 작품 기록에 사용할 수 있어요. 동의하지 않아도 서비스를 쓰는 데 아무 차이가 없고, 설정에서 언제든 바꿀 수 있어요.');
       const upd=()=>{ $$('#onbC .cs-r').forEach(b=>b.setAttribute('aria-checked',!!cs[b.dataset.k])); $('#csAll').setAttribute('aria-checked',cs.age&&cs.terms&&cs.sens&&cs.arch); updateOnbNext(); };
       $$('#onbC .cs-r').forEach(b=>b.onclick=()=>{ cs[b.dataset.k]=!cs[b.dataset.k]; upd(); });
@@ -2803,8 +2826,15 @@ const STEPS=[
   {title:'위치를\n알려 주세요',sub:'가까운 사람을 찾을 때만 쓰여요.',
     render(c){
       c.innerHTML=`<div class="loc-ic">${PIN}</div><div class="loc-btns"><button class="btn" id="oLocY" aria-pressed="${draft.loc===true}">현재 위치 사용</button><button class="btn" id="oLocN" aria-pressed="${draft.loc===false}">사용 안 함</button></div>`;
-      const pick=v=>{ draft.loc=v; $('#oLocY').setAttribute('aria-pressed',v===true); $('#oLocN').setAttribute('aria-pressed',v===false); updateOnbNext(); };
-      $('#oLocY').onclick=()=>pick(true); $('#oLocN').onclick=()=>pick(false);
+      const setBtns=v=>{ $('#oLocY').setAttribute('aria-pressed',v===true); $('#oLocN').setAttribute('aria-pressed',v===false); updateOnbNext(); };
+      c.insertAdjacentHTML('beforeend','<p class="ins-note" id="locNote">현재 위치는 약 1km 단위로 흐리게 서버에 저장되고, 앱을 사용하는 동안 주기적으로 갱신돼요. 정확한 위치는 저장하지 않고, 다른 사람에게 거리만 보여요. 내 정보를 지우면 함께 지워져요.</p>');
+      $('#oLocN').onclick=()=>{ draft.loc=false; delete my.geo; setBtns(false); };
+      $('#oLocY').onclick=async()=>{
+        const b=$('#oLocY'); b.disabled=true; b.textContent='위치를 가져오는 중…';
+        const g=await getGeo(); b.disabled=false; b.textContent='현재 위치 사용';
+        if(g){ my.geo=g; draft.loc=true; setBtns(true); }
+        else{ draft.loc=null; setBtns(null); $('#locNote').textContent='위치를 가져오지 못했어요. 브라우저나 폰 설정에서 이 앱의 위치 권한을 허용한 뒤 다시 눌러 주세요. 원하지 않으면 "사용 안 함"을 골라도 돼요.'; }
+      };
     },
     valid:()=>draft.loc!==null, label:()=>'다음'},
   {title:'만남에서 가장 중요하게\n생각하는 건 뭔가요?',sub:'두 가지를 골라 보세요. 고른 기준으로 사람들이 펼쳐져요. 기준을 바꿔 가면서 다양한 사람들을 만나볼 수 있어요.',noHead:true,
@@ -2956,12 +2986,12 @@ function onbNext(){
 }
 function onbBack(){ if(onbStep>0){ onbStep--; while(onbStep>0&&STEPS[onbStep].skip&&STEPS[onbStep].skip()) onbStep--; renderOnb('back'); } }
 function startOnboarding(){
-  Object.assign(draft,{name:'',age:'',height:'',gender:'',job:'',tags:new Set(),bio:'',loc:null,axes:[],cs:{age:false,terms:false,sens:false,arch:false}});
+  Object.assign(draft,{name:'',age:'',height:'',gender:'',job:'',tags:new Set(),bio:'',loc:null,axes:[],cs:{age:false,terms:false,sens:false,arch:false,installed:false}});
   Object.keys(draftMe).forEach(k=>delete draftMe[k]);
   Object.keys(draftMemo).forEach(k=>delete draftMemo[k]);
   REQUIRED.forEach(id=>{ draftMe[id]={...UNSET_BAR}; });      // 필수 항목은 처음부터 채워진 슬라이더
   FLT_IDS.forEach(id=>{ flt[id]={lo:0,hi:1}; });
-  onbStep=0; $('#onb').hidden=false; renderOnb('fwd');
+  delete my.geo; onbStep=0; $('#onb').hidden=false; renderOnb('fwd');
 }
 function skipOnboarding(){
   applyDemoDefaults(); $('#onb').hidden=true; $('#onbBody').innerHTML='';
@@ -2969,7 +2999,7 @@ function skipOnboarding(){
 }
 function finishOnboarding(){
   my.name=draft.name.trim(); my.age=parseInt(draft.age,10); { const hh=parseInt(draft.height,10); my.height=(hh>0)?hh:null; }
-  my.gender=draft.gender; my.job=draft.job.trim(); my.tags=[...draft.tags]; my.bio=draft.bio.trim(); my.loc=!!draft.loc;
+  my.gender=draft.gender; my.job=draft.job.trim(); my.tags=[...draft.tags]; my.bio=draft.bio.trim(); my.loc=!!draft.loc; if(!my.loc) delete my.geo;
   axes.forEach(a=>{ if(!a.kind) me[a.id]=draftMe[a.id]?{...draftMe[a.id]}:null; });
   Object.keys(meMemo).forEach(k=>delete meMemo[k]); Object.assign(meMemo,draftMemo);
   axes.forEach(a=>{ pref[a.id]=prefDefault(a); });
@@ -2977,6 +3007,7 @@ function finishOnboarding(){
   showLoading();
   $('#onb').hidden=true; $('#onbBody').innerHTML='';
   state.x=draft.axes[0]||'age'; state.y=draft.axes[1]||'lead'; zoom=1; onboarded=true;
+  if(consent){ enterLive(); startLive(); }
   setTab('explore'); updateBadges(); cloudSync(true);
   setTimeout(()=>{ hideLoading(); setTimeout(startCoach,560); },1500);
 }
@@ -3310,7 +3341,7 @@ function loadBaseJson(){
 const FB_CONFIG={apiKey:"AIzaSyA2LzeHfxSRJsmmJEhG6XCJgyRjp-_tZuM",authDomain:"splot-prototype.firebaseapp.com",projectId:"splot-prototype",storageBucket:"splot-prototype.firebasestorage.app",messagingSenderId:"1025107133254",appId:"1:1025107133254:web:61654e10fa21ce0562db47"};
 const FB_VER='10.12.2';
 const EXPO_END=null;           // 전시 마지막 날 'YYYY-MM-DD'를 넣으면, 아카이빙에 동의하지 않은 사람의 정보가 그날부터 30일 뒤 자동 삭제 대상이 돼요
-const CONSENT_V=1;
+const CONSENT_V=4;
 let consent=null;              // {terms,sensitive,archive,at,v}
 const CLOUD={
   st:'idle', uid:null, err:'', mod:null, _p:null,
@@ -3343,9 +3374,13 @@ const CLOUD={
     try{
       if(!await this.init()) return false;
       const m=this.mock(); if(m){ await m.save(pl); return true; }
-      const uid=await this.user(), {F,db}=this.mod, d={...pl,updatedAt:F.serverTimestamp()};
-      if(EXPO_END) d.expireAt=pl.consent.archive?F.deleteField():F.Timestamp.fromMillis(Date.parse(EXPO_END+'T23:59:59+09:00')+30*864e5);
-      await Promise.race([F.setDoc(F.doc(db,'users',uid),d,{merge:true}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+      const uid=await this.user(), {F,db}=this.mod, st=F.serverTimestamp(), R=(c)=>F.doc(db,c,uid);
+      const ex=EXPO_END?(pl.priv.consent.archive?F.deleteField():F.Timestamp.fromMillis(Date.parse(EXPO_END+'T23:59:59+09:00')+30*864e5)):null;
+      const bt=F.writeBatch(db), tail=ex?{expireAt:ex}:{};
+      bt.set(R('users'),{...pl.priv,updatedAt:st,...tail},{merge:true});
+      bt.set(R('profiles'),{...pl.pub,updatedAt:st,...(ex&&!pl.priv.consent.archive?{expireAt:ex}:{})});
+      if(pl.big) bt.set(R('photos'),{...pl.big,updatedAt:st,...(ex&&!pl.priv.consent.archive?{expireAt:ex}:{})});
+      await Promise.race([bt.commit(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),20000))]);
       this.err=''; return true;
     }catch(e){ this.err=String((e&&e.code)||e); console.warn('cloud save',e); return false; }
   },
@@ -3353,20 +3388,50 @@ const CLOUD={
     try{
       if(!await this.init()) return false;
       const m=this.mock(); if(m){ await m.wipe(); this.uid=null; return true; }
-      const uid=await this.user(), {F,Au,db,auth}=this.mod;
-      await Promise.race([F.deleteDoc(F.doc(db,'users',uid)),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000))]);
+      const uid=await this.user(), {F,Au,db,auth}=this.mod, bt=F.writeBatch(db);
+      ['users','profiles','photos'].forEach(c=>bt.delete(F.doc(db,c,uid)));
+      await Promise.race([bt.commit(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),20000))]);
       try{ await Au.deleteUser(auth.currentUser); }catch(e){ try{ await Au.signOut(auth); }catch(_){} }
       this.uid=null; return true;
     }catch(e){ this.err=String((e&&e.code)||e); console.warn('cloud wipe',e); return false; }
+  },
+  async listen(cb){                                        // 다른 참여자들의 공개 프로필을 실시간으로 받아요
+    if(!await this.init()) return null;
+    const m=this.mock(); if(m) return m.listen(cb);
+    try{
+      await this.user(); const {F,db}=this.mod;
+      return F.onSnapshot(F.collection(db,'profiles'),snap=>{ try{ cb(snap.docChanges().map(c=>({type:c.type,id:c.doc.id,data:c.doc.data()}))); }catch(e){ console.warn('live cb',e); } },e=>{ this.err=String((e&&e.code)||e); console.warn('cloud listen',e); });
+    }catch(e){ this.err=String((e&&e.code)||e); return null; }
+  },
+  async big(uid){                                          // 프로필을 열 때 큰 사진을 따로 받아요
+    try{
+      if(!await this.init()) return null;
+      const m=this.mock(); if(m) return m.big(uid);
+      await this.user(); const {F,db}=this.mod, d=await F.getDoc(F.doc(db,'photos',uid));
+      return d.exists()?d.data():null;
+    }catch(e){ console.warn('cloud big',e); return null; }
   }
 };
 function cloudPayload(){
   if(!consent) return null;
   const mm={}; axes.forEach(a=>{ if(!a.kind){ const r=me[a.id]; mm[a.id]=r?{lo:r.lo,hi:r.hi}:null; } });
-  return {v:1,name:my.name,age:my.age,height:my.height||null,gender:my.gender||'',job:my.job||'',tags:[...(my.tags||[])],bio:my.bio||'',loc:!!my.loc,me:mm,
-    consent:{terms:true,sensitive:true,archive:!!consent.archive,at:consent.at,v:CONSENT_V}};
+  return {priv:{v:1,consent:{terms:true,sensitive:true,archive:!!consent.archive,at:consent.at,v:CONSENT_V}},
+    pub:{v:1,name:my.name,age:my.age,height:my.height||null,gender:my.gender||'',job:my.job||'',tags:[...(my.tags||[])],bio:my.bio||'',
+      geo:(my.loc&&my.geo)?{lat:my.geo.lat,lng:my.geo.lng}:null,me:mm},
+    ps:photoSig()};
 }
-let lastCloud='', pendStr='', cloudT=0, cloudBackoff=0;
+const sigOf=x=>{ x=x||''; let h=x.length; for(let i=0;i<x.length;i+=499) h=(h*31+x.charCodeAt(i))|0; return x.length+':'+h; };
+const photoSig=()=>sigOf(photos.me)+'|'+sigOf(photos.meNF);
+function shrink(src,px,q){                                 // 사진을 작은 썸네일로 줄여요
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>{ try{ const c=document.createElement('canvas'); c.width=c.height=px; c.getContext('2d').drawImage(im,0,0,px,px); res(c.toDataURL('image/jpeg',q)); }catch(e){ res(null); } };
+    im.onerror=()=>res(null); im.src=src;
+  });
+}
+const thumbCache={};
+async function thumbOf(key){ const src=photos[key]; if(!src) return null; const c=thumbCache[key]; if(c&&c.src===src) return c.t; const t=await shrink(src,200,.72); thumbCache[key]={src,t}; return t; }
+let lastCloud='', pendStr='', cloudT=0, cloudBackoff=0, lastPs='';
 function cloudSync(force){                                // 내 정보가 바뀌면 잠깐 뒤에 서버에도 올려요. 실패하면 15초 뒤에 다시 시도해요
   if(!onboarded||!consent) return;
   const pl=cloudPayload(); if(!pl) return;
@@ -3375,12 +3440,92 @@ function cloudSync(force){                                // 내 정보가 바�
   if(!force&&Date.now()<cloudBackoff) return;
   pendStr=t; clearTimeout(cloudT);
   cloudT=setTimeout(async()=>{
-    const ok=await CLOUD.save(pl);
+    let ok=false;
+    try{
+      const out={priv:pl.priv,pub:{...pl.pub,thumb:{nf:await thumbOf('meNF'),fc:await thumbOf('me')}}};
+      if(pl.ps!==lastPs) out.big={nf:photos.meNF||null,fc:photos.me||null};
+      ok=await CLOUD.save(out); if(ok&&out.big) lastPs=pl.ps;
+    }catch(e){ console.warn('sync',e); }
     if(pendStr===t) pendStr='';
     if(ok){ lastCloud=t; cloudBackoff=0; } else cloudBackoff=Date.now()+15000;
   },force?0:2500);
 }
+
+/* ---------- 실제 참여자 (서버에 있는 공개 프로필) ---------- */
+let liveOn=false, liveUnsub=null, liveDirty=false, pendingSoc={}, liveAdded=new Set();
+const DUMMY=[...profiles];
+const isLive=()=>!!consent;
+function enterLive(){                                      // 동의하고 시작한 사람은 시연용 프로필 대신 실제 참여자만 봐요
+  if(liveOn) return; liveOn=true;
+  profiles.forEach(p=>clearTimeout(p._autoT)); profiles.length=0; enterIds=new Set();
+  Object.keys(chats).forEach(k=>delete chats[k]); chatOrder=[]; reserveIds=[]; firstRefreshDone=true;
+}
+function leaveLive(){
+  if(!liveOn) return; liveOn=false;
+  if(liveUnsub){ try{ liveUnsub(); }catch(e){} liveUnsub=null; }
+  profiles.length=0; DUMMY.forEach(p=>profiles.push(p)); pendingSoc={}; liveAdded=new Set();
+}
+const hav=(a,b)=>{ const R=6371, r=x=>x*Math.PI/180, dl=r(b.lat-a.lat), dg=r(b.lng-a.lng), q=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2; return 2*R*Math.asin(Math.sqrt(q)); };
+function distKm(p){ if(p.geo&&my.geo) return hav(p.geo,my.geo); return p.uid?null:p.km; }
+function applySoc(p,r){ p.liked=!!r[0]; p.likedAt=r[1]||0; p.likedMeAt=r[2]||0; p.kept=!!r[3]; p.keptAt=r[4]||0; p.penalty=r[5]||0; p.incoming=!!r[6]; p.matched=!!r[7]; p.viewedAt=r[8]||0; p._will=0; p.blocked=!!r[10]; }
+function mkRemote(uid,d){
+  let p=profiles.find(x=>x.uid===uid), fresh=false;
+  if(!p){
+    fresh=true;
+    p={id:profiles.length,uid,v:{},hide:new Set(),tags:[],h:null,km:0,liked:false,likedAt:0,likedMeAt:0,kept:false,keptAt:0,penalty:0,incoming:false,matched:false};
+    profiles.push(p);
+    if(pendingSoc[uid]){ applySoc(p,pendingSoc[uid]); delete pendingSoc[uid]; }
+  }
+  Object.assign(p,{name:String(d.name||''),age:+d.age||0,gender:String(d.gender||''),bio:String(d.bio||''),job:String(d.job||''),tags:Array.isArray(d.tags)?d.tags.slice(0,12):[],h:d.height||null,geo:d.geo||null,gone:false});
+  p.hide=new Set(); p.v={};
+  axes.forEach(a=>{
+    if(a.kind){ if((a.kind==='dist'&&!d.geo)||(a.kind==='height'&&!d.height)) p.hide.add(a.id); return; }
+    const r=d.me&&d.me[a.id]; if(r&&typeof r.lo==='number'&&typeof r.hi==='number') p.v[a.id]={lo:clamp(r.lo,0,1),hi:clamp(r.hi,0,1)}; else p.hide.add(a.id);
+  });
+  p.orig={name:p.name,bio:p.bio,gender:p.gender,age:p.age,job:p.job};
+  const th=d.thumb||{}; if(!p._bigLoaded){ if(th.fc) photos['p'+p.id]=th.fc; else delete photos['p'+p.id]; if(th.nf) photos['q'+p.id]=th.nf; else delete photos['q'+p.id]; }
+  p._new=fresh; return p;
+}
+function onLiveChanges(ch){
+  ch.forEach(c=>{
+    if(c.id===CLOUD.uid) return;
+    if(c.type==='removed'){ const p=profiles.find(x=>x.uid===c.id); if(p){ p.gone=true; liveDirty=true; } return; }
+    const p=mkRemote(c.id,c.data||{}); if(p._new){ liveAdded.add(p.id); } delete p._new; liveDirty=true;
+  });
+}
+async function startLive(){
+  if(!isLive()||liveUnsub) return;
+  liveUnsub=true;
+  const u=await CLOUD.listen(onLiveChanges);
+  liveUnsub=u||null;
+}
+setInterval(()=>{                                          // 새로 들어온 사람이 있으면 방해되지 않는 때에 필드에 반영해요
+  if(!liveDirty||!onboarded) return;
+  if(dragging||peekId!=null||$('#phone').classList.contains('sheet-open')||!$('#onb').hidden) return;
+  liveDirty=false; enterIds=new Set([...enterIds,...liveAdded]); liveAdded=new Set();
+  rebuild(); refreshPhotoUI(); updateBadges();
+},800);
+async function loadBig(p){                                 // 프로필을 열면 큰 사진을 받아서 작은 사진과 바꿔요
+  if(!p.uid||p._bigLoaded||p._bigBusy) return; p._bigBusy=true;
+  const d=await CLOUD.big(p.uid); p._bigBusy=false; if(!d) return; p._bigLoaded=true;
+  const swap=(k,v)=>{ if(!v) return; const old=photos[k]; photos[k]=v; if(old) $$('img').forEach(im=>{ if(im.getAttribute('src')===old) im.src=v; }); };
+  const had=!!(photos['p'+p.id]||photos['q'+p.id]);
+  swap('p'+p.id,d.fc); swap('q'+p.id,d.nf);
+  if(!had){ refreshPhotoUI(); if(ctx.p&&ctx.p.id===p.id&&$('#phone').classList.contains('sheet-open')) openProfile(p.id,ctx.mode); }
+}
 setInterval(()=>cloudSync(),1500);
+/* 앱이 열려 있는 동안 위치를 알아서 새로 받아요 (이미 허용한 경우에만, 5분에 한 번까지) */
+let geoTry=0;
+async function autoGeo(force){
+  if(!onboarded||!consent||!my.loc||document.hidden) return;
+  if(!force&&Date.now()-geoTry<300000) return;
+  geoTry=Date.now();
+  try{ if(navigator.permissions&&navigator.permissions.query){ const st=await navigator.permissions.query({name:'geolocation'}); if(st.state!=='granted') return; } }catch(e){}
+  const g=await getGeo(); if(!g) return;
+  if(!my.geo||my.geo.lat!==g.lat||my.geo.lng!==g.lng){ my.geo=g; cloudSync(); }
+}
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) autoGeo(); });
+setInterval(()=>autoGeo(),300000);
 window.addEventListener('online',()=>{ cloudBackoff=0; cloudSync(); });
 
 /* ---------- 이 기기에 자동 저장 ----------
@@ -3389,7 +3534,8 @@ const SAVE_KEY='S:app';
 let onboarded=false, lastSaved='', bootDone=false;
 function snapshot(){
   return JSON.stringify({v:1,onboarded:true,my,me,pref,ax:[state.x,state.y],seg:state.likeSeg,srt:state.likeSort,
-    soc:profiles.map(p=>[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,p._will?1:0,p.blocked?1:0]),
+    socU:liveOn?{...pendingSoc,...Object.fromEntries(profiles.filter(p=>p.uid).map(p=>[p.uid,[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,0,p.blocked?1:0]]))}:undefined,
+    soc:liveOn?[]:profiles.map(p=>[p.liked?1:0,p.likedAt,p.likedMeAt,p.kept?1:0,p.keptAt,p.penalty,p.incoming?1:0,p.matched?1:0,p.viewedAt||0,p._will?1:0,p.blocked?1:0]),
     chats,chatOrder,autoCount,likeN,flt,reserve:reserveIds,first:firstRefreshDone});
 }
 function saveNow(){
@@ -3409,11 +3555,12 @@ function restoreState(o){
   state.likeSeg=o.seg||'in'; state.likeSort=o.srt||'recent';
   (o.soc||[]).forEach((r,i)=>{ const p=profiles[i]; if(!p) return;
     p.liked=!!r[0]; p.likedAt=r[1]||0; p.likedMeAt=r[2]||0; p.kept=!!r[3]; p.keptAt=r[4]||0; p.penalty=r[5]||0; p.incoming=!!r[6]; p.matched=!!r[7]; p.viewedAt=r[8]||0; p._will=r[9]?1:0; p.blocked=!!r[10]; });
-  Object.keys(chats).forEach(k=>delete chats[k]); Object.assign(chats,o.chats||{});
-  chatOrder=Array.isArray(o.chatOrder)?o.chatOrder:[];
+  Object.keys(chats).forEach(k=>delete chats[k]); if(!liveOn) Object.assign(chats,o.chats||{});
+  chatOrder=(!liveOn&&Array.isArray(o.chatOrder))?o.chatOrder:[];
+  if(liveOn) pendingSoc=o.socU||{};
   autoCount=o.autoCount||0; likeN=o.likeN||0;
   FLT_IDS.forEach(id=>{ const f=o.flt&&o.flt[id]; flt[id]=f?{lo:f.lo,hi:f.hi}:{lo:0,hi:1}; });
-  reserveIds=Array.isArray(o.reserve)?o.reserve:reserveIds; firstRefreshDone=!!o.first;
+  if(!liveOn){ reserveIds=Array.isArray(o.reserve)?o.reserve:reserveIds; firstRefreshDone=!!o.first; }
   profiles.forEach(p=>{ if(p.liked&&!p.matched) scheduleAutoMatch(p); });
 }
 
@@ -3571,11 +3718,12 @@ Promise.race([dbAll,new Promise(res=>setTimeout(()=>res(null),2500))]).then(m=>{
   try{
     if(m){ applyDb(m); }
     if(m&&m['S:consent']){ try{ consent=JSON.parse(m['S:consent']); }catch(e){ consent=null; } }
+    if(consent) enterLive();
     if(m&&m[SAVE_KEY]){ const o=JSON.parse(m[SAVE_KEY]); if(o&&o.onboarded){ restoreState(o); ok=true; } }
   }catch(e){ ok=false; }
   try{
     updateBadges(); setView('field');
-    if(ok){ onboarded=true; $('#onb').hidden=true; lastSaved=snapshot(); setTab('explore'); if(consent){ CLOUD.init().then(()=>cloudSync()); } }
+    if(ok){ onboarded=true; $('#onb').hidden=true; lastSaved=snapshot(); setTab('explore'); if(consent){ CLOUD.init().then(()=>{ cloudSync(); startLive(); }); autoGeo(true); } }
     else startOnboarding();
   }finally{ bootDone=true; hideLoading(); }
 });

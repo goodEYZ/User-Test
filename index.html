@@ -531,6 +531,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .offck input:checked{background:var(--ink);border-color:var(--ink)}
 .offck input:checked::after{content:"";position:absolute;left:5px;top:1.5px;width:4px;height:9px;border:solid #fcfcfc;border-width:0 2px 2px 0;transform:rotate(45deg)}
 .setbtn{display:inline-flex;align-items:center;gap:3px;border:1px solid transparent;background:var(--surface);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;flex:none;box-shadow:0 2px 0 rgba(59,61,59,.10)}
+.facelock{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:var(--field);border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;color:var(--ink);font:inherit}
+.facelock span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.facelock b{font-size:14px;font-weight:600}
+.facelock i{font-style:normal;font-size:12px;opacity:.6;line-height:1.4}
 .setbtn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .flash{border-radius:12px;animation:flash 1.5s ease}
 @keyframes flash{0%,45%{background:rgba(84,84,181,.18)}100%{background:transparent}}
@@ -1037,7 +1041,7 @@ const overlap=(a,b)=>a.lo<=b.hi&&b.lo<=a.hi;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const CAP=50;        // 한 번에 추천되는 인원
+const CAP=70;        // 한 번에 추천되는 인원
 const STEP=.05;      // 스냅 단위 (1/20)
 const MINP=.15;      // 선호 범위의 최소 폭 (스냅 3칸)
 const MINSELF=.14;   // 내 프로필 범위의 최소 폭
@@ -1449,7 +1453,8 @@ function openCropper(file){
 }
 /* 사진은 두 장이에요. 'q<번호>'는 얼굴이 나오지 않는 사진(탐색 화면에 먼저 보여요), 'p<번호>'는 얼굴 사진이에요.
    내 사진은 'meNF'(얼굴 없음)와 'me'(얼굴)예요. 얼굴 없는 사진이 아직 없으면 이름 첫 글자가 든 색 원으로 보여요 */
-const facePh=p=>photos['p'+p.id]||'';
+const facePhRaw=p=>photos['p'+p.id]||'';
+const facePh=p=>photos.me?facePhRaw(p):'';      // 내 얼굴 사진을 올린 사람만 다른 사람의 얼굴 사진을 볼 수 있어요
 const nfPh=p=>photos['q'+p.id]||'';
 const initialOf=n=>{ n=String(n||'').trim(); return n?[...n][0].toUpperCase():'?'; };
 const phTone=id=>{ const h=(id*47+23)%360; return `linear-gradient(145deg,hsl(${h} 38% 84%),hsl(${(h+42)%360} 34% 71%))`; };
@@ -1803,7 +1808,7 @@ function closePeek(){
 function openPeek(p){
   if(!p.el) return;
   if(peekId===p.id){                                           // 같은 점을 다시 누르면 얼굴 사진과 얼굴 없는 사진이 번갈아 나와요
-    if(!facePh(p)){ nudge(p.el); return; }
+    if(!facePh(p)){ nudge(p.el); if(facePhRaw(p)&&!photos.me) toast('얼굴 사진을 등록하면 볼 수 있어요',{label:'설정',fn:goSetFace}); return; }
     p.el.dataset.front=p.el.dataset.front==='fc'?'nf':'fc';
     return;
   }
@@ -1960,6 +1965,7 @@ function openProfile(id,mode){
   ctx.p=p; ctx.mode=mode; ctx.ready=false; ctx.armed=false; clearTimeout(ctx.timer);
   openSheet(`<div class="grab"></div><button type="button" class="smore" id="pfMenu" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
     <div class="smenu" id="pfMenuBox" role="menu" hidden><button type="button" role="menuitem" id="mBlock"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>차단</button><button type="button" role="menuitem" id="mReport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2.2 4L17 13H6"/></svg>신고</button></div>${basisHTML(p,mode)}${head}
+    ${(!photos.me&&facePhRaw(p))?`<button type="button" class="facelock" id="faceLock"><span><b>얼굴 사진이 있어요</b><i>내 얼굴 사진을 등록한 사람만 다른 사람의 얼굴 사진을 볼 수 있어요</i></span>${SETBTN}</button>`:''}
     ${p.job?`<div class="job">${esc(p.job)}</div>`:''}${p.tags&&p.tags.length?`<div class="tags">${p.tags.map(t=>`<span class="tg">${esc(t)}</span>`).join('')}</div>`:''}
     <p class="bio">${esc(p.bio)}</p>
     ${nn?`<p class="ov">내 범위와 겹침 <b>${ov}/${nn}</b></p>`:''}
@@ -1971,6 +1977,7 @@ function openProfile(id,mode){
     $('#sheet').onclick=e=>{ if(!box.hidden&&!e.target.closest('#pfMenu,#pfMenuBox')){ box.hidden=true; mb.setAttribute('aria-expanded','false'); } };
     $('#mBlock').onclick=()=>confirmBlock(p);
     $('#mReport').onclick=()=>openReport(p); }
+  { const fl=$('#faceLock'); if(fl) fl.onclick=goSetFace; }
   const ps=$('#pstack');
   if(ps) ps.onclick=()=>{ const f=ps.dataset.front==='fc'?'nf':'fc'; ps.dataset.front=f; $('#pcap').textContent=f==='fc'?'얼굴 사진':'대표 사진'; };
   if(mode==='view'){ }
@@ -2131,6 +2138,17 @@ function goSetAxis(id){
     else if(ax.kind==='height') el=$('.ed[data-k="height"]');
     else el=$(`#pfBody .trk[data-ax="${id}"]`);
     if(!el) return;
+    if(el.scrollIntoView) el.scrollIntoView({block:'center',behavior:REDUCED?'auto':'smooth'});
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    setTimeout(()=>el.classList.remove('flash'),1700);
+  },60);
+}
+// 얼굴 사진을 등록해야 다른 사람의 얼굴 사진을 볼 수 있어요: 프로필 탭의 사진 칸으로 바로 이동해요
+function goSetFace(){
+  closeSheet(); closePage('pagePref');
+  setTab('profile');
+  setTimeout(()=>{
+    const el=$('#pfPhotos .ph2b[data-k="me"]')||$('#pfPhotos'); if(!el) return;
     if(el.scrollIntoView) el.scrollIntoView({block:'center',behavior:REDUCED?'auto':'smooth'});
     el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(()=>el.classList.remove('flash'),1700);
@@ -2518,7 +2536,7 @@ function renderProfileTab(){
     <div class="pf-sec">
       <div class="pf-l">사진</div>
       <div class="ph2" id="pfPhotos"></div>
-      <p class="hint2" style="margin-top:10px">탐색 화면에는 얼굴이 나오지 않는 사진이 먼저 보여요. 얼굴 사진은 상대가 프로필을 눌러야 볼 수 있어요.</p>
+      <p class="hint2" style="margin-top:10px">탐색 화면에는 얼굴이 나오지 않는 사진이 먼저 보여요. 얼굴 사진은 상대가 프로필을 눌러야 볼 수 있고, 얼굴 사진을 등록한 사람만 다른 사람의 얼굴 사진을 볼 수 있어요.</p>
     </div>
     <div class="pf-sec">
       <div class="pf-l">젠더</div>
@@ -2621,7 +2639,13 @@ function buildStats(d){
   const gKey=g=>{ g=String(g||'').trim(); if(!g) return 'none'; if(/^(\uc5ec\uc131|she\/her)$/i.test(g)) return 'she'; if(/^(\ub0a8\uc131|he\/him)$/i.test(g)) return 'he'; if(/^(\ub17c\ubc14\uc774\ub108\ub9ac|they\/them)$/i.test(g)) return 'they'; return 'other'; };
   const gc={she:0,he:0,they:0,other:0,none:0}; if(P) P.forEach(p=>{ gc[gKey(p.gender)]++; });
   const gcard=(k,l)=>card(P?gc[k]:'-',l+(P&&P.length?` · ${Math.round(gc[k]/P.length*100)}%`:''));
-  return `<div class="grp first">전체</div><div class="st-grid">
+  const PR=d.presence, now=Date.now(), within=ms=>PR?PR.filter(x=>now-x.at<=ms).length:'-';
+  return `<div class="grp first">접속 현황</div><div class="st-grid">
+    ${card(within(5*60e3),'지금 접속 중 (최근 5분)')}
+    ${card(within(3600e3),'최근 1시간 접속')}
+    ${card(within(24*3600e3),'최근 24시간 접속')}
+    ${card(PR?PR.length:'-','접속 기록이 있는 사람')}</div>
+    <div class="grp">전체</div><div class="st-grid">
     ${card(v(P,x=>x.length),'등록된 사람')}
     ${card(v(P,x=>x.filter(p=>p.fc).length),'얼굴 사진을 올린 사람')}
     ${card(v(P,x=>x.filter(p=>p.nf).length),'얼굴 없는 사진을 올린 사람')}
@@ -2687,7 +2711,7 @@ function openSettings(){
     <button class="set-btn" id="setCloud">서버 연결<em id="cloudSt"></em></button>
     <button class="set-btn" id="setOnb">온보딩 다시 하기</button>
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v34</p>
+    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v36</p>
     <p class="hint2" style="margin-top:10px;text-align:center;word-break:break-all">내 관리자 ID: <b>${esc(CLOUD.uid||'(서버 연결 후 표시)')}</b></p>`;
   const paint=()=>{ $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
   paint(); if(admCache&&admCache.d.profiles) $('#usCount').textContent=admCache.d.profiles.length+'명';
@@ -3604,7 +3628,14 @@ const CLOUD={
       get('likes',(id,d)=>({from:d.from,to:d.to,at:+d.at||0})),
       get('chats',(id,d)=>{ const m=Array.isArray(d.msgs)?d.msgs:[]; return {id,members:d.members||[],n:m.length,senders:new Set(m.map(x=>x&&x.f).filter(Boolean)).size}; }),
       get('reports',(id,d)=>({...d,id}))]);
-    return {uid,profiles,likes,chats,reports,errs};
+    const presence=await get('presence',(id,d)=>({id,at:+d.at||0}));
+    return {uid,profiles,likes,chats,reports,presence,errs};
+  },
+  async beat(){                                            // 접속 확인: 앱을 보고 있는 동안 3분에 한 번만 '마지막 접속 시각'을 남겨요
+    const m=this.mock(); if(m) return m.beat&&m.beat();
+    if(!await this.init()) return;
+    const uid=await this.user(), {F,db}=this.mod;
+    await F.setDoc(F.doc(db,'presence',uid),{at:Date.now()});
   },
   async report(rec){                                       // 신고를 서버에도 남겨요 (관리자가 모든 신고를 볼 수 있게)
     const m=this.mock(); if(m) return;
@@ -3819,6 +3850,10 @@ async function loadBig(p){                                 // 프로필을 열�
   if(!had){ refreshPhotoUI(); if(ctx.p&&ctx.p.id===p.id&&$('#phone').classList.contains('sheet-open')) openProfile(p.id,ctx.mode); }
 }
 setInterval(()=>cloudSync(),1500);
+/* 접속 확인: 앱이 화면에 떠 있는 동안 3분마다 한 번 (쓰기 횟수를 아끼려고 드물게 보내요) */
+let lastBeat=0;
+function beat(){ if(!onboarded||!consent||document.hidden||Date.now()-lastBeat<170000) return; lastBeat=Date.now(); CLOUD.beat().catch(()=>{}); }
+setInterval(beat,30000); document.addEventListener('visibilitychange',beat); setTimeout(beat,4000);
 /* 앱이 열려 있는 동안 위치를 알아서 새로 받아요 (이미 허용한 경우에만, 5분에 한 번까지) */
 let geoTry=0;
 async function autoGeo(force){

@@ -393,6 +393,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .st-c{background:var(--field);border-radius:16px;padding:14px 14px 12px}
 .st-c b{display:block;font-size:26px;font-weight:600;letter-spacing:-.01em}
 .st-c span{display:block;margin-top:2px;font-size:12px;color:var(--ink2);line-height:1.35}
+.adm-u{flex-direction:row!important;gap:12px!important;align-items:center}
+.adm-ph{display:flex;gap:6px;flex:none}
+.adm-th{width:48px;height:48px;border-radius:12px;border:0;padding:0;background:var(--field);overflow:hidden;cursor:pointer;display:block}
+.adm-th img{width:100%;height:100%;object-fit:cover;display:block}
+.adm-th.e{cursor:default;opacity:.6}
+.adm-tx{min-width:0;display:flex;flex-direction:column;gap:2px}
+.adm-big{border-radius:18px;overflow:hidden;background:var(--field);margin-bottom:14px}
+.adm-big img{display:block;width:100%;max-height:60vh;object-fit:contain}
 .pf-foot{margin:4px 0 34px;text-align:center}
 .pf-link{display:block;margin:6px auto;border:0;background:none;color:var(--ink2);opacity:.55;font-size:12px;text-decoration:underline;cursor:pointer;padding:6px 10px}
 .pf-link[hidden]{display:none}
@@ -2610,11 +2618,20 @@ function buildStats(d){
   const likers=Lk?new Set(Lk.map(l=>l.from)).size:null;
   const started=C?C.filter(c=>c.n>0).length:null, talk2=C?C.filter(c=>c.senders>=2).length:null, msgs=C?C.reduce((s,c)=>s+c.n,0):null;
   const card=(n,l)=>`<div class="st-c"><b>${n}</b><span>${l}</span></div>`;
+  const gKey=g=>{ g=String(g||'').trim(); if(!g) return 'none'; if(/^(\uc5ec\uc131|she\/her)$/i.test(g)) return 'she'; if(/^(\ub0a8\uc131|he\/him)$/i.test(g)) return 'he'; if(/^(\ub17c\ubc14\uc774\ub108\ub9ac|they\/them)$/i.test(g)) return 'they'; return 'other'; };
+  const gc={she:0,he:0,they:0,other:0,none:0}; if(P) P.forEach(p=>{ gc[gKey(p.gender)]++; });
+  const gcard=(k,l)=>card(P?gc[k]:'-',l+(P&&P.length?` · ${Math.round(gc[k]/P.length*100)}%`:''));
   return `<div class="grp first">전체</div><div class="st-grid">
     ${card(v(P,x=>x.length),'등록된 사람')}
     ${card(v(P,x=>x.filter(p=>p.fc).length),'얼굴 사진을 올린 사람')}
     ${card(v(P,x=>x.filter(p=>p.nf).length),'얼굴 없는 사진을 올린 사람')}
     ${card(v(P,x=>x.filter(p=>p.geo).length),'위치를 쓰는 사람')}</div>
+    <div class="grp">젠더별 인원</div><div class="st-grid">
+    ${gcard('she','여성 (she/her)')}
+    ${gcard('he','남성 (he/him)')}
+    ${gcard('they','논바이너리 (they/them)')}
+    ${gcard('other','직접 입력 (Others)')}
+    ${gcard('none','선택 안 함')}</div>
     <div class="grp">좋아요 · 매칭</div><div class="st-grid">
     ${card(v(Lk,x=>x.length),'보낸 좋아요')}
     ${card(v(likers,x=>x),'좋아요를 보낸 사람')}
@@ -2633,12 +2650,19 @@ function buildStats(d){
 function buildUsers(d){
   const P=d.profiles; if(!P) return `<p class="hint2" style="padding:12px 0">사용자 목록을 읽지 못했어요.</p>${permNote(d)}`;
   const me_=CLOUD.uid;
-  const rows=[...P].sort((a,b)=>b.at-a.at).map(p=>`<div class="rrow adm-u" data-q="${esc((p.name+' '+p.job+' '+p.gender+' '+p.tags.join(' ')).toLowerCase())}"><b>${esc(p.name||'(이름 없음)')} <i>${p.age||''}${p.gender?' · '+esc(p.gender):''}${p.id===me_?' · 나':''}</i></b><span>${esc(p.job||'-')}${p.tags.length?' · '+esc(p.tags.join(', ')):''}</span><em>${fmtT(p.at)} · ${p.fc?'얼굴 사진':'얼굴 사진 없음'} · ${p.nf?'얼굴 없는 사진':'얼굴 없는 사진 없음'} · ID …${esc(p.id.slice(-6))}</em></div>`).join('');
+  const ph=(p,k,l)=>p[k]?`<button type="button" class="adm-th" data-id="${esc(p.id)}" data-k="${k}" aria-label="${esc(p.name)} ${l}"><img src="${p[k]}" alt=""></button>`:`<span class="adm-th e" title="${l} 없음"></span>`;
+  const rows=[...P].sort((a,b)=>b.at-a.at).map(p=>`<div class="rrow adm-u" data-q="${esc((p.name+' '+p.job+' '+p.gender+' '+p.tags.join(' ')).toLowerCase())}"><div class="adm-ph">${ph(p,'nf','얼굴 없는 사진')}${ph(p,'fc','얼굴 사진')}</div><div class="adm-tx"><b>${esc(p.name||'(이름 없음)')} <i>${p.age||''}${p.gender?' · '+esc(p.gender):''}${p.id===me_?' · 나':''}</i></b><span>${esc(p.job||'-')}${p.tags.length?' · '+esc(p.tags.join(', ')):''}</span><em>${fmtT(p.at)} · ID …${esc(p.id.slice(-6))}</em></div></div>`).join('');
   return `<div class="fld" style="margin-bottom:6px"><input class="inp" id="admQ" type="search" placeholder="이름·직업·관심 분야로 찾기" aria-label="사용자 검색"></div>
     <p class="hint2" id="admCnt" style="margin:6px 0 4px">전체 ${P.length}명</p><div id="admList">${rows}</div>${permNote(d)}
     <button class="set-btn" id="admRefresh" style="margin-top:14px;justify-content:center">새로 불러오기</button>`;
 }
-buildUsers.after=()=>{
+buildUsers.after=d=>{
+  $$('#admList .adm-th[data-id]').forEach(b=>b.onclick=()=>{
+    const p=d.profiles.find(x=>x.id===b.dataset.id); if(!p) return; const k=b.dataset.k;
+    openSheet(`<div class="grab"></div><h2>${esc(p.name||'(이름 없음)')}</h2><p class="sub">${k==='fc'?'얼굴 사진':'얼굴 없는 사진'}</p><div class="adm-big"><img id="admBigImg" src="${p[k]}" alt=""></div><div class="acts"><button class="btn primary" id="admBigOk">닫기</button></div>`);
+    $('#admBigOk').onclick=closeSheet;
+    CLOUD.big(p.id).then(x=>{ const im=$('#admBigImg'); if(im&&x&&x[k]) im.src=x[k]; });
+  });
   const q=$('#admQ'); if(!q) return;
   q.oninput=()=>{ const s=q.value.trim().toLowerCase(); let n=0; $$('#admList .adm-u').forEach(r=>{ const ok=!s||r.dataset.q.includes(s); r.hidden=!ok; if(ok) n++; }); $('#admCnt').textContent=s?`검색 결과 ${n}명`:`전체 ${$$('#admList .adm-u').length}명`; };
 };
@@ -2663,7 +2687,7 @@ function openSettings(){
     <button class="set-btn" id="setCloud">서버 연결<em id="cloudSt"></em></button>
     <button class="set-btn" id="setOnb">온보딩 다시 하기</button>
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v33</p>
+    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v34</p>
     <p class="hint2" style="margin-top:10px;text-align:center;word-break:break-all">내 관리자 ID: <b>${esc(CLOUD.uid||'(서버 연결 후 표시)')}</b></p>`;
   const paint=()=>{ $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
   paint(); if(admCache&&admCache.d.profiles) $('#usCount').textContent=admCache.d.profiles.length+'명';
@@ -3576,7 +3600,7 @@ const CLOUD={
     const get=async(c,map)=>{ try{ const s=await F.getDocsFromServer(F.collection(db,c)); return s.docs.map(d=>map(d.id,d.data())); }catch(e){ errs[c]=String((e&&e.code)||e); return null; } };
     const ms=t=>t&&t.toMillis?t.toMillis():(+t||0);
     const [profiles,likes,chats,reports]=await Promise.all([
-      get('profiles',(id,d)=>({id,name:String(d.name||''),age:+d.age||0,gender:String(d.gender||''),job:String(d.job||''),tags:Array.isArray(d.tags)?d.tags:[],nf:!!(d.thumb&&d.thumb.nf),fc:!!(d.thumb&&d.thumb.fc),geo:!!d.geo,at:ms(d.updatedAt)})),
+      get('profiles',(id,d)=>({id,name:String(d.name||''),age:+d.age||0,gender:String(d.gender||''),job:String(d.job||''),tags:Array.isArray(d.tags)?d.tags:[],nf:(d.thumb&&typeof d.thumb.nf==='string')?d.thumb.nf:'',fc:(d.thumb&&typeof d.thumb.fc==='string')?d.thumb.fc:'',geo:!!d.geo,at:ms(d.updatedAt)})),
       get('likes',(id,d)=>({from:d.from,to:d.to,at:+d.at||0})),
       get('chats',(id,d)=>{ const m=Array.isArray(d.msgs)?d.msgs:[]; return {id,members:d.members||[],n:m.length,senders:new Set(m.map(x=>x&&x.f).filter(Boolean)).size}; }),
       get('reports',(id,d)=>({...d,id}))]);

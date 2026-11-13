@@ -2574,7 +2574,7 @@ function renderProfileTab(){
 
 /* ---------- 프로필 맨 아래: 동의 · 위치 · 내 데이터 지우기 ---------- */
 /* ===== 푸시 알림 (FCM) ===== */
-const VAPID_KEY='';                                          // Firebase 콘솔 > 프로젝트 설정 > 클라우드 메시징 > 웹 푸시 인증서의 '키 쌍'을 여기에 붙여 넣어요
+const VAPID_KEY='BGWPqKyqiVz0UDSztdrUUWhXt_y2em1igpNWnwlv-dDvoz_xokgUQsFiLheekSLc-ZlxIl2056kw7GdQxZfKTM4';                                          // Firebase 콘솔 > 프로젝트 설정 > 클라우드 메시징 > 웹 푸시 인증서의 '키 쌍'을 여기에 붙여 넣어요
 const PUSH_OK=()=>!!VAPID_KEY&&'Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window;
 const IS_IOS=/iphone|ipad|ipod/i.test(navigator.userAgent), IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
 function bindPush(){

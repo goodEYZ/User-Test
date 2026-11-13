@@ -533,6 +533,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus
 .setbtn{display:inline-flex;align-items:center;gap:3px;border:1px solid transparent;background:var(--surface);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;flex:none;box-shadow:0 2px 0 rgba(59,61,59,.10)}
 .facelock{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:var(--field);border-radius:14px;padding:12px 14px;margin:10px 0;cursor:pointer;color:var(--ink);font:inherit}
 .facelock span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.setbtn:empty{display:none}
 .facelock b{font-size:14px;font-weight:600}
 .facelock i{font-style:normal;font-size:12px;opacity:.6;line-height:1.4}
 .setbtn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -2559,6 +2560,7 @@ function renderProfileTab(){
       ${GROUPS.map((g,gi)=>gi===0?'':(`<div class="grp">${g}</div>`+own.filter(a=>a.group===gi).map(a=>trackBlock(a,'self')).join(''))).join('')}
     </div>
     <p class="autosave">모든 내용은 자동 저장 됩니다.</p>
+    <button type="button" class="facelock" id="pfPush" hidden style="margin:18px 0 6px"><span><b id="pfPushT">알림 받기</b><i id="pfPushS"></i></span><span class="setbtn" id="pfPushB"></span></button>
     <div class="pf-foot"><button class="pf-link" id="pfArch"></button><button class="pf-link" id="pfGeo">내 위치 새로 가져오기</button><button class="pf-link" id="pfWipe">내 데이터 모두 지우기</button></div>`;
   updateMeHero(); renderTagsRow(); bindPfFoot();
   $('#mePhoto').onclick=()=>{photoTarget='meNF';$('#fileOne').click()};
@@ -2571,7 +2573,34 @@ function renderProfileTab(){
 }
 
 /* ---------- 프로필 맨 아래: 동의 · 위치 · 내 데이터 지우기 ---------- */
+/* ===== 푸시 알림 (FCM) ===== */
+const VAPID_KEY='';                                          // Firebase 콘솔 > 프로젝트 설정 > 클라우드 메시징 > 웹 푸시 인증서의 '키 쌍'을 여기에 붙여 넣어요
+const PUSH_OK=()=>!!VAPID_KEY&&'Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window;
+const IS_IOS=/iphone|ipad|ipod/i.test(navigator.userAgent), IS_STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+function bindPush(){
+  const row=$('#pfPush'); if(!row) return;
+  if(!VAPID_KEY||!consent){ row.hidden=true; return; }
+  row.hidden=false;
+  const t=$('#pfPushT'), sub=$('#pfPushS'), bt=$('#pfPushB');
+  const paint=()=>{
+    if(IS_IOS&&!IS_STANDALONE){ t.textContent='알림 받기'; sub.textContent='아이폰은 공유 버튼 > 홈 화면에 추가로 앱을 설치한 뒤에 켤 수 있어요'; bt.textContent=''; return; }
+    if(!PUSH_OK()){ t.textContent='알림을 쓸 수 없어요'; sub.textContent='이 브라우저는 푸시 알림을 지원하지 않아요'; bt.textContent=''; return; }
+    if(Notification.permission==='denied'){ t.textContent='알림이 꺼져 있어요'; sub.textContent='브라우저(또는 기기) 설정에서 이 앱의 알림을 허용해 주세요'; bt.textContent=''; return; }
+    const on=Notification.permission==='granted'&&localStorage.getItem('splot-push')==='1';
+    t.textContent=on?'알림이 켜져 있어요':'알림 받기'; sub.textContent=on?'좋아요, 매칭, 새 메시지가 오면 알려드려요':'좋아요·매칭·새 메시지를 알림으로 받아요'; bt.textContent=on?'':'켜기';
+  };
+  paint();
+  row.onclick=async()=>{
+    if(!PUSH_OK()||(IS_IOS&&!IS_STANDALONE)||Notification.permission==='denied') return;
+    if(Notification.permission==='granted'&&localStorage.getItem('splot-push')==='1'){ toast('이미 알림이 켜져 있어요'); return; }
+    try{
+      const perm=await Notification.requestPermission(); if(perm!=='granted'){ paint(); toast('알림이 허용되지 않았어요'); return; }
+      await CLOUD.pushOn(); localStorage.setItem('splot-push','1'); paint(); toast('알림을 켰어요');
+    }catch(e){ console.warn('push',e); toast('알림을 켜지 못했어요'); }
+  };
+}
 function bindPfFoot(){
+  bindPush();
   const a=$('#pfArch'), g=$('#pfGeo'), w=$('#pfWipe'); if(!w) return;
   if(consent){
     const pa=()=>{ a.textContent=`프로젝트 아카이빙 동의: ${consent.archive?'동의함':'동의 안 함'} (눌러서 변경)`; };
@@ -2711,7 +2740,7 @@ function openSettings(){
     <button class="set-btn" id="setCloud">서버 연결<em id="cloudSt"></em></button>
     <button class="set-btn" id="setOnb">온보딩 다시 하기</button>
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v36</p>
+    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v38</p>
     <p class="hint2" style="margin-top:10px;text-align:center;word-break:break-all">내 관리자 ID: <b>${esc(CLOUD.uid||'(서버 연결 후 표시)')}</b></p>`;
   const paint=()=>{ $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
   paint(); if(admCache&&admCache.d.profiles) $('#usCount').textContent=admCache.d.profiles.length+'명';
@@ -3547,12 +3576,30 @@ const CLOUD={
       this.uid=null; return true;
     }catch(e){ this.err=String((e&&e.code)||e); console.warn('cloud wipe',e); return false; }
   },
-  async listen(cb){                                        // 다른 참여자들의 공개 프로필을 실시간으로 받아요
+  async listen(cb,needIds){                                // 다른 참여자들의 공개 프로필을 받아요 (읽기 횟수를 아끼려고 실시간 구독 대신 주기적으로 '새로 바뀐 것만' 가져와요)
     if(!await this.init()) return null;
     const m=this.mock(); if(m) return m.listen(cb);
     try{
       await this.user(); const {F,db}=this.mod;
-      return F.onSnapshot(F.collection(db,'profiles'),snap=>{ try{ cb(snap.docChanges().map(c=>({type:c.type,id:c.doc.id,data:c.doc.data()}))); }catch(e){ console.warn('live cb',e); } },e=>{ this.err=String((e&&e.code)||e); console.warn('cloud listen',e); });
+      const C=F.collection(db,'profiles'), seen=new Set(); let last=null, busy=false, first=true;
+      const MAXN=150;                                      // 처음에는 가장 최근에 바뀐 150명까지만 읽어요
+      const poll=async()=>{
+        if(busy) return; busy=true;
+        try{
+          const q=last?F.query(C,F.where('updatedAt','>',last),F.orderBy('updatedAt','asc'),F.limit(MAXN)):F.query(C,F.orderBy('updatedAt','desc'),F.limit(MAXN));
+          const snap=await F.getDocsFromServer(q), ch=[];
+          snap.docs.forEach(d=>{ const t=d.data().updatedAt; if(t&&(!last||t.toMillis()>last.toMillis())) last=t; ch.push({type:seen.has(d.id)?'modified':'added',id:d.id,data:d.data()}); seen.add(d.id); });
+          // 나와 좋아요·대화로 이어진 사람은 최근 순위 밖이어도 따로 가져와요
+          const need=(needIds?needIds():[]).filter(id=>id&&!seen.has(id)&&id!==this.uid).slice(0,30);
+          for(const id of need){ try{ const d=await F.getDoc(F.doc(db,'profiles',id)); seen.add(id); if(d.exists()) ch.push({type:'added',id,data:d.data()}); }catch(e){} }
+          if(ch.length||first){ first=false; cb(ch); }
+        }catch(e){ this.err=String((e&&e.code)||e); console.warn('cloud poll',e); }
+        busy=false;
+      };
+      poll();
+      const iv=setInterval(()=>{ if(!document.hidden) poll(); },90000);
+      const vis=()=>{ if(!document.hidden) poll(); }; document.addEventListener('visibilitychange',vis);
+      return ()=>{ clearInterval(iv); document.removeEventListener('visibilitychange',vis); };
     }catch(e){ this.err=String((e&&e.code)||e); return null; }
   },
   async like(to){
@@ -3630,6 +3677,16 @@ const CLOUD={
       get('reports',(id,d)=>({...d,id}))]);
     const presence=await get('presence',(id,d)=>({id,at:+d.at||0}));
     return {uid,profiles,likes,chats,reports,presence,errs};
+  },
+  async pushOn(){                                          // 이 기기의 알림 주소(토큰)를 받아서 서버에 저장해요
+    if(!VAPID_KEY||this.mock()) return;
+    if(!await this.init()) throw new Error('offline');
+    const uid=await this.user(), {F,db,app}=this.mod;
+    const M=await import('https://www.gstatic.com/firebasejs/'+FB_VER+'/firebase-messaging.js');
+    const reg=await navigator.serviceWorker.ready;
+    const token=await M.getToken(M.getMessaging(app),{vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});
+    if(!token) throw new Error('no token');
+    await F.setDoc(F.doc(db,'fcmTokens',uid),{tokens:F.arrayUnion(token),at:Date.now()},{merge:true});
   },
   async beat(){                                            // 접속 확인: 앱을 보고 있는 동안 3분에 한 번만 '마지막 접속 시각'을 남겨요
     const m=this.mock(); if(m) return m.beat&&m.beat();
@@ -3742,7 +3799,7 @@ function updateRefreshBadge(){ const b=$('#fieldRefresh'); if(b) b.classList.tog
 async function startLive(){
   if(!isLive()||liveUnsub) return;
   liveUnsub=true;
-  const [u]=await Promise.all([CLOUD.listen(ch=>{ onLiveChanges(ch); liveDirty=true; applyLikeState(); }),startLikes()]);     // 프로필·좋아요·대화방을 동시에 듣기 시작해요
+  const [u]=await Promise.all([CLOUD.listen(ch=>{ onLiveChanges(ch); liveDirty=true; applyLikeState(); },()=>[...likesOut.keys(),...likesIn.keys()]),startLikes()]);     // 프로필·좋아요·대화방을 동시에 듣기 시작해요
   liveUnsub=[].concat(u||[],liveUnsub===true?[]:liveUnsub||[]);
 }
 setInterval(()=>{                                          // 새로 들어온 사람이 있으면 방해되지 않는 때에 필드에 반영해요
@@ -3853,6 +3910,7 @@ setInterval(()=>cloudSync(),1500);
 /* 접속 확인: 앱이 화면에 떠 있는 동안 3분마다 한 번 (쓰기 횟수를 아끼려고 드물게 보내요) */
 let lastBeat=0;
 function beat(){ if(!onboarded||!consent||document.hidden||Date.now()-lastBeat<170000) return; lastBeat=Date.now(); CLOUD.beat().catch(()=>{}); }
+if(localStorage.getItem('splot-push')==='1') setTimeout(()=>{ try{ if(PUSH_OK()&&Notification.permission==='granted'&&consent) CLOUD.pushOn().catch(()=>{}); }catch(e){} },6000);
 setInterval(beat,30000); document.addEventListener('visibilitychange',beat); setTimeout(beat,4000);
 /* 앱이 열려 있는 동안 위치를 알아서 새로 받아요 (이미 허용한 경우에만, 5분에 한 번까지) */
 let geoTry=0;

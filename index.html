@@ -1487,9 +1487,13 @@ function refreshPhotoUI(){
 let dayOffset=0;
 function currentDay(){const d=new Date();d.setDate(d.getDate()+dayOffset);return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`}
 let dayKey=currentDay();
+// 매일 사람마다 다른 70명을 무작위로 뽑아요: 날짜 + 내 기기 고유값 + 상대의 고유 ID로 정해서, 하루 동안은 같은 순서가 유지돼요
+function mySeed(){
+  try{ let v=localStorage.getItem('splot-seed'); if(!v){ v=Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('splot-seed',v); } return v; }catch(_){ return 'x'; }
+}
+const strHash=t=>{ let h=2166136261; for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; };
 function dayNoise(p){
-  const s=[...dayKey].reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7);
-  const r=rng(s+p.id*131); r(); return r()*12;
+  const r=rng(strHash(dayKey+'|'+(CLOUD.uid||mySeed())+'|'+(p.uid||('l'+p.id)))); r(); return r();   // 0 ~ 1
 }
 // 둘 다 설정한 축만 세어요
 function fit(p){ let n=0; axes.forEach(a=>{ if(!isSet(a.id)) return; const v=pv(p,a.id); if(v&&overlap(v,ensurePref(a.id))) n++; }); return n; }
@@ -1499,7 +1503,7 @@ function visible(){
   const pool=profiles.filter(p=>!p.gone&&!p.pending&&!p.liked&&!p.incoming&&!p.matched&&!p.blocked);
   const pinned=pool.filter(p=>p.kept);                 // 기억한 사람은 계속 필드에 남아요
   const rest=pool.filter(p=>!p.kept)
-    .map(p=>({p,s:p.penalty*1000-fit(p)*10+dayNoise(p)}))
+    .map(p=>({p,s:p.penalty*1000+dayNoise(p)}))      // 숨긴 적 있는 사람은 뒤로, 나머지는 그날의 무작위 순서
     .sort((a,b)=>a.s-b.s).slice(0,Math.max(0,CAP-pinned.length)).map(x=>x.p);
   return [...pinned,...rest];
 }
@@ -2740,7 +2744,7 @@ function openSettings(){
     <button class="set-btn" id="setCloud">서버 연결<em id="cloudSt"></em></button>
     <button class="set-btn" id="setOnb">온보딩 다시 하기</button>
     <button class="set-btn" id="setTut">튜토리얼 다시 보기</button>
-    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v39</p>
+    <p class="autosave" style="margin-top:18px">앱 버전 v45 · 캐시 splot-v40</p>
     <p class="hint2" style="margin-top:10px;text-align:center;word-break:break-all">내 관리자 ID: <b>${esc(CLOUD.uid||'(서버 연결 후 표시)')}</b></p>`;
   const paint=()=>{ $('#cloudSt').textContent=CLOUD.st==='ok'?'연결됨':(CLOUD.st==='connecting'?'연결 중':(CLOUD.st==='error'?'연결 안 됨':'대기')); };
   paint(); if(admCache&&admCache.d.profiles) $('#usCount').textContent=admCache.d.profiles.length+'명';
@@ -3431,7 +3435,7 @@ $('#world').addEventListener('click',e=>{
    내 범위가 화면에서 많이 벗어나면 고무줄처럼 저항하고, 놓으면 튕겨 돌아와요 */
 (function(){
   const plane=$('#plane'), stage=$('#stage');
-  const ptrs=new Map(); let pan=null, pinch=null, rt=0, wt=0, moved=false;
+  const ptrs=new Map(), dotPtrs=new Map(); let pan=null, pinch=null, rt=0, wt=0, moved=false;
   const frac=(cx,cy,r)=>[((cx-r.left)/r.width*100-6)/88,((cy-r.top)/r.height*100-6)/88];
   const scheduleRebuild=()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(state.tab==='explore'&&state.view==='field'&&!dragging) buildField(); },250); };
   function startPan(pt){ pan={x:pt.x,y:pt.y,ox:getOff(state.x),oy:getOff(state.y)}; pinch=null; }
@@ -3451,7 +3455,11 @@ $('#world').addEventListener('click',e=>{
   }
   plane.addEventListener('pointerdown',e=>{
     if(!e.target.closest('.dot')) closePeek();                 // 바깥을 누르면 작아지고 탐색 모드로 돌아와요
-    if(e.target.closest('.dot,.zh,.zc')) return;
+    const onDot=!!e.target.closest('.dot');
+    if(e.target.closest('.zh,.zc')) return;
+    if(onDot&&!ptrs.size&&!dotPtrs.size){ dotPtrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); return; }   // 프로필 위의 첫 손가락: 눌러서 열기는 그대로
+    // 이미 다른 손가락이 (프로필 위든 빈 곳이든) 닿아 있으면 두 번째 손가락부터는 확대/축소로 이어가요
+    dotPtrs.forEach((pt,id)=>{ ptrs.set(id,pt); }); dotPtrs.clear();
     cancelAnimationFrame(raf);
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     plane.setPointerCapture(e.pointerId); plane.classList.add('panning'); e.preventDefault();
@@ -3459,6 +3467,7 @@ $('#world').addEventListener('click',e=>{
     else if(ptrs.size===2){ startPinch(); }
   });
   plane.addEventListener('pointermove',e=>{
+    if(dotPtrs.has(e.pointerId)) dotPtrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(!ptrs.has(e.pointerId)) return;
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const r=stage.getBoundingClientRect();
@@ -3479,7 +3488,9 @@ $('#world').addEventListener('click',e=>{
     }
   });
   const end=e=>{
+    dotPtrs.delete(e.pointerId);
     if(!ptrs.has(e.pointerId)) return;
+    if(moved) noClickUntil=performance.now()+400;             // 확대하던 손가락이 먼저 떨어져도 그 아래 프로필이 열리지 않게 해요
     ptrs.delete(e.pointerId);
     if(ptrs.size===1){ startPan([...ptrs.values()][0]); return; }     // 한 손가락이 떨어지면 다시 이동 모드
     if(ptrs.size===0){
